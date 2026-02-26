@@ -1,0 +1,228 @@
+🐶 REPLIT WEBSITE BUILDER MASTER PROMPT  
+Project: The Woofing Oven  
+Goal: Build the most joyful, high-converting dog bakery website in Ireland
+
+You are building a premium, celebration-led ecommerce website for:
+
+Brand Name: The Woofing Oven  
+Positioning: Ireland’s No.1 Dog Bakery  
+Location: Dublin, Ireland  
+Core Identity: Natural · Celebration-led · Market-loved · Dublin-born  
+
+This must feel like a joyful celebration brand for dogs — NOT a generic pet shop.
+
+------------------------------------------------------------
+🎨 DESIGN SYSTEM (MANDATORY)
+
+Colour Palette:
+Primary: #FFC56E (warm golden yellow)
+Cream: #FFF5E6
+Accent Brown: #6B4F3A
+White: #FFFFFF
+Soft Black: #222222
+
+Typography:
+Headings: Rounded serif or soft playful font (friendly bakery feel)
+Body: Clean sans-serif (Montserrat or Poppins style)
+
+Visual Mood:
+Bright
+Natural light photography
+Celebration-focused
+Clean layouts
+Soft rounded corners
+Subtle shadows
+Never dark theme
+Never corporate
+Never luxury-black styling
+
+Use soft paw watermark patterns at low opacity in background sections.
+
+------------------------------------------------------------
+🧭 WEBSITE STRUCTURE
+
+1️⃣ HERO SECTION (Above the Fold)
+
+Layout:
+Two-column layout
+Left: Copy
+Right: Large natural-light Barkday cake image
+
+Background: Soft cream with subtle paw watermark (5% opacity)
+
+Headline:
+Ireland’s No.1 Dog Bakery 🐾
+
+Subheading:
+100% Natural Treats & Custom Barkday Cakes — Freshly Baked in Dublin
+
+CTA Buttons:
+Primary (solid #FFC56E):
+Shop All Treats
+
+Secondary (outline brown):
+Book a Barkday Cake
+
+Sticky navigation bar:
+Home | Shop | Barkday Cakes | Find Us | Reviews | About | Contact | Cart icon
+
+Navigation turns warm yellow on scroll.
+
+------------------------------------------------------------
+2️⃣ TRUST STRIP
+
+Background: Soft cream  
+4 evenly spaced icon blocks (line icons in soft brown)
+
+🌿 100% Natural Ingredients  
+No additives. No nasties. Just real dog-safe goodness.
+
+🎂 Custom Celebration Cakes  
+Personalised Barkday magic made to order.
+
+🏪 Every Sunday at Dún Laoghaire Market  
+Meet us in person. Free samples. Tail wags guaranteed.
+
+⭐ 5-Star Dog-Approved Reviews  
+Loved by pups all across Dublin.
+
+------------------------------------------------------------
+3️⃣ FEATURED PRODUCTS GRID
+
+Grid layout: 4–8 products  
+Rounded cards with light shadow.
+
+Each card:
+Product image
+Product name (fun tone like “Pawty Woofles” or “Barkday Box”)
+Price
+Small Add to Cart button
+
+Hover animation:
+Slight card lift
+Button darkens to deeper golden tone
+
+Keep spacing generous and breathable.
+
+------------------------------------------------------------
+4️⃣ BARKDAY CAKE BUILDER SECTION
+
+Split layout:
+
+Left: Elegant cake photo  
+Right: Clean 3-step explanation
+
+Title:
+Design the Perfect Barkday 🎉
+
+Steps:
+1. Choose Size  
+2. Choose Flavour (Protein or Standard)  
+3. Add Name & Age  
+
+Primary CTA button:
+Design Your Cake
+
+Small supporting text:
+3–5 days notice required. Collection available.
+
+Keep this section extremely simple and frictionless.
+
+------------------------------------------------------------
+5️⃣ MARKET & COMMUNITY SECTION
+
+Lifestyle photography with warm sunlight.
+
+Headline:
+Come Sniff Us in Person 🐕
+
+Copy:
+Every Sunday at Dún Laoghaire People’s Park.  
+Free samples. Big smiles. Tail wags guaranteed.
+
+Include:
+Map embed
+“Get Directions” button
+
+This section should feel community-driven and real.
+
+------------------------------------------------------------
+6️⃣ REVIEWS SECTION (UGC Style)
+
+Background: Soft pastel yellow (#FFC56E at low opacity)
+
+Horizontal sliding review cards.
+
+Each review:
+Dog name as heading (e.g., “Rocky 🐾 says…”)
+5 gold stars
+Review written in playful dog tone
+Circular happy dog image
+
+Make this feel social and alive.
+
+------------------------------------------------------------
+7️⃣ ABOUT SECTION (Founder + Dogs)
+
+Split layout.
+
+Left: Photo of founder with Bella (Cockapoo) and Benjamin (Jack Russell-Dachshund cross).  
+Right: Story copy.
+
+Headline:
+Baked With Love in Ireland 🇮🇪
+
+Story points:
+Family-run
+Natural ingredients
+Market roots
+Dogs are family
+Celebration is everything
+
+Keep warm and heartfelt but concise.
+
+------------------------------------------------------------
+8️⃣ FOOTER
+
+Background: Accent Brown (#6B4F3A)
+
+Include:
+Quick links
+Market times
+Instagram preview grid
+Email signup field:
+Join the Santa Paws List 🐾
+Payment icons
+Copyright
+
+------------------------------------------------------------
+💻 TECH REQUIREMENTS
+
+Fully responsive (mobile-first design)
+Soft animations (fade-ins, hover lifts)
+Optimised loading speed
+SEO-ready structure
+Clean ecommerce structure
+Clear conversion paths
+Sticky cart icon
+Smooth scrolling
+
+------------------------------------------------------------
+🧠 STRATEGIC PRIORITIES
+
+Celebration must dominate visually.
+Ordering must feel easy.
+Market presence must build trust.
+Dogs must appear throughout.
+Joyful but clean.
+Not cluttered.
+Not corporate.
+
+This website should feel like:
+A birthday party for dogs — professionally executed.
+
+Build this as a polished, production-ready ecommerce website with beautiful spacing, hierarchy, animations, and conversion-focused layout.
+
+Make it memorable.
+Make it dominant.
+Make it the celebration bakery Ireland remembers.

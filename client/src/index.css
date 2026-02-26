@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Rubik+Bubbles&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* The Woofing Oven Palette */
+    --background: 36 100% 98%; /* Very soft cream/white */
+    --foreground: 0 0% 13%;    /* Soft black #222222 */
+    
+    --primary: 36 100% 71%;    /* Warm Golden Yellow #FFC56E */
+    --primary-foreground: 26 30% 32%; /* Accent Brown text on primary */
+    
+    --secondary: 36 100% 95%;  /* Cream #FFF5E6 */
+    --secondary-foreground: 26 30% 32%; /* Accent Brown */
+    
+    --accent: 26 30% 32%;      /* Accent Brown #6B4F3A */
+    --accent-foreground: 36 100% 95%; /* Cream */
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+    --card-border: 36 40% 90%;
+    
+    --border: 36 40% 90%;
+    --input: 36 40% 90%;
+    --ring: 36 100% 71%;
+    
+    --radius: 1.5rem; /* Playful, large border radius */
+
+    --font-display: 'Rubik Bubbles', sans-serif;
+    --font-sans: 'Fredoka', sans-serif;
+  }
+
+  /* Force light mode only as requested */
+  .dark {
+    /* Mirroring light mode to strictly prevent dark theme */
+    --background: 36 100% 98%; 
+    --foreground: 0 0% 13%;    
+    --primary: 36 100% 71%;    
+    --primary-foreground: 26 30% 32%; 
+    --secondary: 36 100% 95%;  
+    --secondary-foreground: 26 30% 32%; 
+    --accent: 26 30% 32%;      
+    --accent-foreground: 36 100% 95%; 
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+    --border: 36 40% 90%;
+    --input: 36 40% 90%;
+    --ring: 36 100% 71%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    /* Subtle paw print watermark pattern using radial gradients */
+    background-image: radial-gradient(var(--secondary) 2px, transparent 2px), radial-gradient(var(--secondary) 2px, transparent 2px);
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-semibold tracking-tight text-accent;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 10px 40px -10px rgba(107, 79, 58, 0.08);
+  }
+  .shadow-soft-hover {
+    box-shadow: 0 20px 50px -15px rgba(107, 79, 58, 0.15);
+  }
+}

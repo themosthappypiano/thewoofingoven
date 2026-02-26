@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Favicon</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Fill with yellow background
+        ctx.fillStyle = '#fbc560';
+        ctx.fillRect(0, 0, 512, 512);
+        
+        // Load the logo image
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            // Calculate size to fit logo in favicon with minimal padding (really big logo)
+            const padding = 8;
+            const size = 512 - (padding * 2);
+            
+            // Draw the logo centered
+            ctx.drawImage(img, padding, padding, size, size);
+            
+            // Convert to PNG and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'favicon.png';
+                a.click();
+                URL.revokeObjectURL(url);
+                console.log('Favicon created and downloaded!');
+            });
+        };
+        img.src = 'https://framerusercontent.com/images/bYdEiYKnlTCyPyWpSa1NHSZyyrE.png?scale-down-to=512&width=794&height=644';
+    </script>
+</body>
+</html>
