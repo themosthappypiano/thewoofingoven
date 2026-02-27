@@ -3,15 +3,13 @@ services:
     name: thewoofingoven
     env: node
     plan: free
-    buildCommand: cd /opt/render/project && npm ci && npm run build
+    buildCommand: cd /opt/render/project && npm ci --production=false && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: thewoofingoven-db
-          property: connectionString
+        value: file:./dev.db
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: VITE_STRIPE_PUBLISHABLE_KEY

@@ -4,11 +4,12 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { stripe, calculateShipping, SHIPPING_RATES } from "./stripe";
-import { db } from "./db";
+import { db as dbPromise } from "./db";
 import { products, productVariants } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
 async function seedDatabase() {
+  const db = await dbPromise;
   const existingProducts = await storage.getProducts();
   if (existingProducts.length === 0) {
     const sampleProducts = [
@@ -157,6 +158,7 @@ export async function registerRoutes(
         console.error('Supabase products read failed, using local DB:', supabaseError);
       }
 
+      const db = await dbPromise;
       const allProducts = await db.select().from(products);
       const allVariants = await db.select().from(productVariants);
 
@@ -224,6 +226,7 @@ export async function registerRoutes(
         console.error('Supabase product read failed, using local DB:', supabaseError);
       }
 
+      const db = await dbPromise;
       const product = await db.select().from(products).where(eq(products.id, productId)).limit(1);
       if (product.length > 0) {
         const variants = await db
@@ -312,6 +315,7 @@ export async function registerRoutes(
 
         let variantData: any = null;
         if (canQueryDb) {
+          const db = await dbPromise;
           const variant = await db.select().from(productVariants)
             .where(eq(productVariants.id, variantIdNumber))
             .limit(1);

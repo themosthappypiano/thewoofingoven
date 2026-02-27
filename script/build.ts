@@ -45,6 +45,11 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
   const externals = allDeps.filter((dep) => !allowlist.includes(dep));
+  
+  // Ensure better-sqlite3 is external and not bundled
+  if (!externals.includes('better-sqlite3')) {
+    externals.push('better-sqlite3');
+  }
 
   await esbuild({
     entryPoints: ["server/index.ts"],
