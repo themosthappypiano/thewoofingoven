@@ -96,7 +96,6 @@ logs
 *.log
 
 # Local database exports
-*.json
 local-data-export.json
 
 # Migration scripts (sensitive)
