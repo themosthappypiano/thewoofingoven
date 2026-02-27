@@ -3,6 +3,7 @@ services:
     name: thewoofingoven
     env: node
     plan: free
+    rootDir: ./
     buildCommand: npm ci --production=false && npm run build
     startCommand: npm start
     envVars:
