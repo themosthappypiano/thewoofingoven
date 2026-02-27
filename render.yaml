@@ -3,7 +3,7 @@ services:
     name: thewoofingoven
     env: node
     plan: free
-    buildCommand: cd /opt/render/project && npm ci --production=false && npm run build
+    buildCommand: npm ci --production=false && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
