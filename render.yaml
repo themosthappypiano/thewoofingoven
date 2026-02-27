@@ -3,8 +3,7 @@ services:
     name: thewoofingoven
     env: node
     plan: free
-    rootDir: .
-    buildCommand: npm ci && npm run build
+    buildCommand: cd /opt/render/project && npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
