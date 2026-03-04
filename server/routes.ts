@@ -88,6 +88,22 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  const canonicalDescriptions: Record<string, string> = {
+    "Doggy Birthday Cake":
+      "Celebrate your pup in style with our freshly baked birthday cakes, available in 3, 4, and 6 inch sizes with your choice of protein or non-protein bases. Pick from standard, personalised, or drip designs to make their big day extra special. Handmade with dog-friendly ingredients and baked with love. Dublin delivery available for cakes, or collection.",
+    "Pupcakes":
+      "Soft, fluffy apple & carrot pupcakes topped with dog-friendly frosting - perfect for sharing (or not!). Available in party boxes of different sizes for every kind of celebration.",
+    "Barkday Box":
+      "A ready-to-go birthday surprise filled with themed, hand-decorated biscuits. The perfect gift for dogs who love a little extra fuss on their special day.",
+    "Training Treats":
+      "Tasty little reward bites in our popular flavours - perfect for training, tricks, or just because they're a very good dog.",
+    "Woofles":
+      "Grain-free carrot waffles that are crunchy, wholesome, and easy to break into snack-sized pieces. Great for sensitive tummies.",
+    "Dognuts":
+      "Banana & peanut butter baked dognuts finished with dog-friendly icing. Fun, festive, and guaranteed tail wags.",
+    "Seasonal Treats":
+      "Limited-edition themed goodies throughout the year, with personalised options available to match the season.",
+  };
 
   const mapVariant = (variant: any) => ({
     id: variant.id,
@@ -120,7 +136,7 @@ export async function registerRoutes(
   const mapProduct = (product: any, variants: any[]) => ({
     id: product.id,
     name: product.name,
-    description: product.description,
+    description: canonicalDescriptions[product.name] ?? product.description,
     price: product.base_price ?? product.basePrice ?? product.price ?? "0",
     imageUrl: product.image_url ?? product.imageurl ?? product.imageUrl ?? "",
     imageUrls: parseImageUrls(product.image_urls ?? product.imageUrls),

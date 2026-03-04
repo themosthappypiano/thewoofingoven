@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/Button";
-import { Link } from "wouter";
 import { CheckCircle2 } from "lucide-react";
 
 export function CakeBuilder() {
+  const handleDesignCakeClick = () => {
+    window.location.href = "/shop#cake-product";
+  };
+
   const steps = [
     "Choose your size (3-inch, 4-inch, or 6-inch)",
     "Pick a base (protein or non-protein)",
@@ -47,11 +50,13 @@ export function CakeBuilder() {
               </ul>
               
               <div className="pt-4">
-                <Link href="/shop#cake-product" className="block w-full sm:inline-block sm:w-auto">
-                  <Button size="lg" className="w-full sm:w-auto text-lg px-12">
-                    Design Your Cake
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto text-lg px-12"
+                  onClick={handleDesignCakeClick}
+                >
+                  Design Your Cake
+                </Button>
                 <p className="text-sm text-accent/50 mt-4 text-center sm:text-left font-medium">
                   * 3-5 days notice required. Collection only at the market or Dublin studio.
                 </p>

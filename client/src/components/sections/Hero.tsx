@@ -5,6 +5,25 @@ import { useState, useEffect } from "react";
 
 export function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const handleBookCakeClick = () => {
+    if (window.location.pathname !== "/") {
+      window.location.href = "/#cakes";
+      return;
+    }
+
+    const element = document.getElementById("cakes");
+    if (!element) return;
+
+    const navbarHeight = 120;
+    const extraOffset = 60;
+    const elementPosition = element.offsetTop - navbarHeight - extraOffset;
+
+    window.scrollTo({
+      top: elementPosition,
+      behavior: "smooth",
+    });
+  };
   
   const heroImages = [
     "https://i.ibb.co/kdygfZG/Chat-GPT-Image-Feb-25-2026-07-05-20-AM.png",
@@ -52,11 +71,14 @@ export function Hero() {
                   Shop All Treats
                 </Button>
               </Link>
-              <Link href="/#cakes">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  Book a Barkday Cake
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleBookCakeClick}
+              >
+                Book a Barkday Cake
+              </Button>
             </div>
             
             <div className="pt-4 flex items-center justify-center md:justify-start gap-4 text-sm font-medium text-accent/60">

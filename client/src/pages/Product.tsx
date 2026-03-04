@@ -39,6 +39,7 @@ export default function ProductPage() {
   const [selectedTrainingPack, setSelectedTrainingPack] = useState<string>("1 Pack");
   const [selectedPackOption, setSelectedPackOption] = useState<string>("1 Pack");
   const [selectedPupcakeBox, setSelectedPupcakeBox] = useState<string>("Box of 2");
+  const [isFlavorInfoOpen, setIsFlavorInfoOpen] = useState(false);
 
   const variants: Variant[] = product?.variants || [];
   const isCake = product?.category === 'cake';
@@ -48,6 +49,7 @@ export default function ProductPage() {
   const isDognuts = product?.name === 'Dognuts';
   const isBarkdayBox = product?.name === 'Barkday Box';
   const useCakeSelectors = isCake && !isPupcakes;
+  const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign;
   const parsedVariants: ParsedVariant[] = useMemo(
     () =>
       variants.map((variant) => {
@@ -154,10 +156,29 @@ export default function ProductPage() {
     parsedVariants[0] ||
     null;
 
+  const trainingFlavorInfo: Record<string, { description: string; ingredients: string[] }> = {
+    "Pee-Nutz": {
+      description:
+        "Crunchy peanut-butter training treats with a naturally nutty taste dogs love.",
+      ingredients: ["Peanut butter", "Oat flour", "Egg", "Coconut oil"],
+    },
+    "Tuna Puffs": {
+      description:
+        "Savory fishy bites made for high-value rewards during training sessions.",
+      ingredients: ["Tuna", "Oat flour", "Egg", "Coconut oil"],
+    },
+    "Cheesy Bites": {
+      description:
+        "Cheese-forward mini treats for dogs who respond best to rich, savory flavors.",
+      ingredients: ["Cheese", "Oat flour", "Egg", "Coconut oil"],
+    },
+  };
+  const selectedTrainingFlavorInfo = trainingFlavorInfo[selectedTrainingFlavor];
+
   useEffect(() => {
     if (product) {
       setSelectedImage(0);
-      setSelectedDesign(designs[0] ?? "");
+      setSelectedDesign("");
       setSelectedFlavor("Non-Protein");
       setSelectedSize(sizes[0] ?? "");
       setSelectedVariantId(parsedVariants[0]?.id ?? null);
@@ -212,6 +233,17 @@ export default function ProductPage() {
         "https://i.ibb.co/G3pYK2Z8/image.png",
       ],
     };
+    const defaultCakeImages = [
+      "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg",
+      "https://i.postimg.cc/V6FnwmxG/Whats-App-Image-2025-10-15-at-21-35-32-(3).jpg",
+      "https://i.postimg.cc/B6CH34rw/Whats-App-Image-2025-10-15-at-21-35-32-(4).jpg",
+      "https://i.postimg.cc/LXVLS2cQ/Whats-App-Image-2025-10-15-at-21-35-32-(6).jpg",
+      "https://i.postimg.cc/JnQZ8Mf2/Whats-App-Image-2025-10-15-at-21-35-34-(3).jpg",
+      "https://i.postimg.cc/Hns5sFm2/Whats-App-Image-2025-10-15-at-21-35-34-(4).jpg",
+      "https://i.postimg.cc/ZnK3KXmj/Whats-App-Image-2025-10-15-at-21-35-34-(5).jpg",
+      "https://i.postimg.cc/yxY9Y2KL/Whats-App-Image-2025-10-15-at-21-35-34-(6).jpg",
+      "https://i.postimg.cc/T1YmYBxC/Whats-App-Image-2025-10-15-at-21-35-34-(9).jpg",
+    ];
     const pupcakesImages = ["https://i.ibb.co/4RHFLxnN/image.png"];
     const dognutsImages = [
       "https://i.ibb.co/8L24cVhq/image.png",
@@ -223,11 +255,14 @@ export default function ProductPage() {
       "https://i.ibb.co/VYfcVtXy/image.png",
       "https://i.ibb.co/bj4YCFwx/image.png",
     ];
+    if (isPupcakes) {
+      return pupcakesImages;
+    }
     if (isCake && selectedDesign && cakeDesignImages[selectedDesign]?.length) {
       return cakeDesignImages[selectedDesign];
     }
-    if (isPupcakes) {
-      return pupcakesImages;
+    if (useCakeSelectors && !selectedDesign) {
+      return defaultCakeImages;
     }
     if (isDognuts) {
       return dognutsImages;
@@ -244,15 +279,30 @@ export default function ProductPage() {
       return [selectedVariant.imageUrl, ...base];
     }
     return base;
-  }, [product, selectedVariant?.imageUrl]);
+  }, [
+    product,
+    selectedDesign,
+    isCake,
+    isPupcakes,
+    isDognuts,
+    isBarkdayBox,
+    isWoofles,
+    selectedVariant?.imageUrl,
+  ]);
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (selectedImage > 0 && selectedImage >= images.length) {
+      setSelectedImage(0);
+    }
+  }, [images.length, selectedImage]);
+
+  useEffect(() => {
+    if (!shouldAutoRotateImages || images.length <= 1) return;
     const interval = setInterval(() => {
       setSelectedImage((current) => (current + 1) % images.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [images.length, shouldAutoRotateImages]);
 
   useEffect(() => {
     setImageOpacity(0);
@@ -440,6 +490,7 @@ export default function ProductPage() {
                             onClick={() => {
                               setSelectedTrainingFlavor(flavor);
                               setSelectedImage(0);
+                              setIsFlavorInfoOpen(true);
                             }}
                             className={`px-3 py-2 rounded-xl border text-left transition-colors ${
                               selectedTrainingFlavor === flavor
@@ -451,6 +502,22 @@ export default function ProductPage() {
                           </button>
                         ))}
                       </div>
+                      {selectedTrainingFlavorInfo && (
+                        <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3">
+                          <div className="text-sm font-semibold text-accent mb-1">
+                            {selectedTrainingFlavor}
+                          </div>
+                          <p className="text-sm text-accent/80 mb-2">
+                            {selectedTrainingFlavorInfo.description}
+                          </p>
+                          <button
+                            onClick={() => setIsFlavorInfoOpen(true)}
+                            className="text-sm font-semibold text-primary hover:underline"
+                          >
+                            View ingredients
+                          </button>
+                        </div>
+                      )}
 
                       <div className="text-sm font-semibold text-accent/80 mb-2">Pack</div>
                       <div className="flex flex-wrap gap-2">
@@ -543,6 +610,32 @@ export default function ProductPage() {
         </div>
       </main>
       <Footer />
+
+      {isTrainingTreats && isFlavorInfoOpen && selectedTrainingFlavorInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsFlavorInfoOpen(false)}
+          />
+          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+            <h3 className="text-2xl font-display font-bold text-accent mb-2">
+              {selectedTrainingFlavor}
+            </h3>
+            <p className="text-accent/80 mb-4">{selectedTrainingFlavorInfo.description}</p>
+            <h4 className="text-sm font-bold text-accent mb-2">Ingredients</h4>
+            <ul className="space-y-2 mb-5">
+              {selectedTrainingFlavorInfo.ingredients.map((ingredient) => (
+                <li key={ingredient} className="text-sm text-accent/80">
+                  - {ingredient}
+                </li>
+              ))}
+            </ul>
+            <Button className="w-full" onClick={() => setIsFlavorInfoOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

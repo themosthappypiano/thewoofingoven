@@ -4,11 +4,30 @@ import { useProducts } from "@/hooks/use-api";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/store/use-cart";
 import { ShoppingBag } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function Shop() {
   const { data: products, isLoading } = useProducts();
   const addItem = useCart((state) => state.addItem);
+  const [location] = useLocation();
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (!hash || location !== "/shop") return;
+
+    const element = document.getElementById(hash);
+    if (!element) return;
+
+    const navbarHeight = 120;
+    const extraOffset = 10;
+    const elementPosition = element.offsetTop - navbarHeight - extraOffset;
+
+    window.scrollTo({
+      top: elementPosition,
+      behavior: "smooth",
+    });
+  }, [location]);
 
   // Mock data fallback
   const displayProducts = products?.length ? products : [
@@ -49,6 +68,12 @@ export default function Shop() {
                         : product.name === "Barkday Box"
                           ? "https://i.ibb.co/0gpzNsx/image.png"
                           : product.imageUrl;
+                const pupcakesDefaultVariant = product.name === "Pupcakes"
+                  ? product.variants?.find((variant: any) => variant.name?.includes("Box of 2"))
+                  : undefined;
+                const displayPrice = Number(
+                  pupcakesDefaultVariant?.price ?? product.variants?.[0]?.price ?? product.price
+                ) || 0;
                 return (
                 <div
                   key={product.id}
@@ -69,7 +94,7 @@ export default function Shop() {
                     >
                       {product.name}
                     </Link>
-                    <p className="text-primary font-bold text-lg">€{(Number(product.price) || 0).toFixed(2)}</p>
+                    <p className="text-primary font-bold text-lg">€{displayPrice.toFixed(2)}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button 
