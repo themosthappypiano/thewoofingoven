@@ -280,6 +280,10 @@ export default function ProductPage() {
         "https://i.ibb.co/Fkkf5xrD/image.png",
         "https://i.ibb.co/HDJrVNJ3/image.png",
       ],
+      "Standard Non-Personalised": [
+        "https://i.postimg.cc/K86Zn752/Whats-App-Image-2026-03-23-at-22-36-50(1).jpg",
+        "https://i.postimg.cc/ZK3ZJvmS/brightened-image.jpg",
+      ],
       "Standard Personalised": [
         "https://i.ibb.co/HDNsKRS2/image.png",
         "https://i.ibb.co/G3pYK2Z8/image.png",
