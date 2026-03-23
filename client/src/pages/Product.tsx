@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import { useProduct } from "@/hooks/use-api";
 import { useCart } from "@/store/use-cart";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
 
 type Variant = {
   id: string | number;
@@ -40,6 +40,8 @@ export default function ProductPage() {
   const [selectedPackOption, setSelectedPackOption] = useState<string>("1 Pack");
   const [selectedPupcakeBox, setSelectedPupcakeBox] = useState<string>("Box of 2");
   const [isFlavorInfoOpen, setIsFlavorInfoOpen] = useState(false);
+  const [isBenefitsOpen, setIsBenefitsOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const variants: Variant[] = product?.variants || [];
   const isCake = product?.category === 'cake';
@@ -49,7 +51,7 @@ export default function ProductPage() {
   const isDognuts = product?.name === 'Dognuts';
   const isBarkdayBox = product?.name === 'Barkday Box';
   const useCakeSelectors = isCake && !isPupcakes;
-  const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign;
+  const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign || selectedDesign === "Deluxe/Bespoke";
   const parsedVariants: ParsedVariant[] = useMemo(
     () =>
       variants.map((variant) => {
@@ -128,17 +130,18 @@ export default function ProductPage() {
     });
   }, [parsedVariants, selectedDesign, selectedFlavor, useCakeSelectors, cakeVariants]);
   const isDeluxe = selectedDesign === "Deluxe/Bespoke";
+  const isBoneShaped = selectedDesign === "Bone Shaped Design";
   const selectedVariant =
     (useCakeSelectors
       ? cakeVariants.find(
           (variant: any) =>
             variant.design === selectedDesign &&
-            variant.base === selectedFlavor &&
+            variant.base === selectedCakeFlavor &&
             variant.size === selectedSize
         ) ||
         cakeVariants.find(
           (variant: any) =>
-            variant.design === selectedDesign && variant.base === selectedFlavor
+            variant.design === selectedDesign && variant.base === selectedCakeFlavor
         ) ||
         cakeVariants.find((variant: any) => variant.design === selectedDesign)
       : isTrainingTreats
@@ -148,7 +151,7 @@ export default function ProductPage() {
               variant.name.includes(selectedTrainingPack)
           )
         : isPupcakes
-          ? parsedVariants.find((variant) => variant.name.includes(selectedPupcakeBox))
+          ? parsedVariants.find((variant) => variant.name === selectedPupcakeBox || variant.name === `Apple & Carrot - ${selectedPupcakeBox} - Pack`)
           : parsedVariants.find(
               (variant) => variant.name.includes(selectedPackOption)
             ) ||
@@ -156,21 +159,69 @@ export default function ProductPage() {
     parsedVariants[0] ||
     null;
 
+  // Product descriptions based on user's detailed content
+  const productDescriptions: Record<string, { short: string; full: string }> = {
+    "Bow-Wownies": {
+      short: "Soft, chewy training treats made with real beef liver, banana and Greek yogurt for a naturally rich flavour dogs love.",
+      full: "Bow-Wownies are soft, chewy training treats made with **real beef liver, banana and Greek yogurt** for a naturally rich flavour dogs love. Their small size makes them perfect for training sessions, allowing you to reward your pup frequently without overfeeding. The soft texture also makes them easy to chew for puppies, small breeds and senior dogs.\n\nMade with **100% oat flour**, these treats are gentle on digestion while still being highly motivating during training or playtime."
+    },
+    "Pee-Nutz": {
+      short: "Small, tasty peanut butter treats specially baked for training and enrichment activities.",
+      full: "Pee-Nutz are small, tasty peanut butter treats specially baked for training and enrichment activities. Their bite-size shape makes them ideal for teaching new commands, rewarding good behaviour or using inside **snuffle mats and puzzle toys**.\n\nMade with simple ingredients and **dog-friendly peanut butter**, they are easy to digest and loved by dogs of all sizes."
+    },
+    "Tuna Puffs": {
+      short: "Light, savoury training treats made with tuna in spring water and flaxseed, creating a naturally fishy flavour dogs find irresistible.",
+      full: "Tuna Puffs are light, savoury training treats made with **tuna in spring water and flaxseed**, creating a naturally fishy flavour dogs find irresistible. These tiny bites are perfect as high-value rewards during recall training or enrichment games.\n\nTheir small size makes them perfect for frequent rewards while keeping dogs focused and engaged."
+    },
+    "Cheesy Bites": {
+      short: "Tiny savoury treats made with grated mozzarella and a touch of turmeric, giving them a flavour dogs absolutely love.",
+      full: "Cheesy Bites are tiny savoury treats made with **grated mozzarella and a touch of turmeric**, giving them a flavour dogs absolutely love. Their soft texture allows dogs to quickly enjoy the reward and stay focused on the next command.\n\nThese treats are perfect for training sessions, enrichment toys and everyday rewards."
+    },
+    "Training Treats": {
+      short: "A selection of small, motivating training treats including Pee-Nutz, Tuna Puffs, and Cheesy Bites.",
+      full: "Our Training Treats collection includes three different flavors perfect for training sessions:\n\n**Pee-Nutz** - Tiny peanut butter training treats\n**Tuna Puffs** - Soft tuna & flaxseed training bites\n**Cheesy Bites** - Soft mozzarella training treats\n\nAll treats are small-sized, easy to chew, and perfect for frequent rewards during training without overfeeding."
+    },
+    "Woofles": {
+      short: "Our signature grain-free soft carrot waffles, the very first treat created at The Woofing Oven.",
+      full: "Woofles are our **signature product and the very first treat created at The Woofing Oven**. These soft, grain-free waffles are made with carrot and chickpea flour, creating a wholesome snack that is gentle on sensitive tummies.\n\nThey can be enjoyed as a simple everyday treat or topped with dog-friendly spreads for an extra special moment."
+    },
+    "Dognuts": {
+      short: "Soft baked donuts made with banana, peanut butter and Greek yogurt, topped with dog-friendly icing and coconut sprinkles.",
+      full: "Dognuts are soft baked donuts made with **banana, peanut butter and Greek yogurt**, creating a naturally sweet treat that dogs adore. Each donut is topped with **dog-friendly icing and coconut sprinkles**, making them perfect for birthdays, gotcha days and special celebrations.\n\nThey are soft, fluffy and easy to share with dog friends during a paw-ty."
+    },
+    "Petzza": {
+      short: "Dog-friendly 8\" pizza treat baked with minced chicken, minced beef, vegetables and mozzarella cheese.",
+      full: "Petzza is our fun dog-friendly version of pizza, baked with **minced chicken, minced beef, vegetables and mozzarella cheese** on a gentle oat-flour base. Each Petzza measures approximately **8 inches and is cut into about 7 slices**, making it perfect for sharing at doggy parties or daycare celebrations.\n\nFor extra flavour, a **bacon topping can be added on request**."
+    },
+    "Doggy Birthday Cake": {
+      short: "Freshly baked celebration cakes made specially for dogs using simple, natural ingredients.",
+      full: "Our Doggie Cakes are freshly baked celebration cakes made specially for dogs using simple, natural ingredients. Each cake is filled with a creamy blend of **Greek yogurt and peanut butter** and finished with a smooth **cream cheese frosting**.\n\nThey are available in **3\", 4\", and 6\" round cakes**, as well as a **bone-shaped cake** perfect for larger dog parties or daycare celebrations.\n\n**Available flavours:**\n- **Banana & Peanut Butter** – a naturally sweet favourite\n- **Apple & Carrots** – a gentle, lightly sweet recipe\n- **Chicken & Spinach** – a savoury cake for meaty flavors\n- **Mince Beef & Beetroot** – our dog-friendly \"red velvet\""
+    },
+    "Pupcakes": {
+      short: "Mini dog cupcakes made with apple and carrot, perfect for small celebrations and party favours.",
+      full: "Pupcakes are mini dog cupcakes made with the same wholesome recipe as our Apple & Carrot Doggie Cake. These soft treats are perfect for **small celebrations, party favours, daycare treats or Barkday Boxes**.\n\nThey can be served plain or topped with a light **cream cheese frosting**."
+    },
+    "Gingerbread Hooman": {
+      short: "Playful dog-friendly version of the classic gingerbread man, lightly spiced with ginger and cinnamon.",
+      full: "The Gingerbread Hooman is our playful dog-friendly version of the classic gingerbread man. Lightly spiced with **ground ginger and a touch of cinnamon**, and gently sweetened with **honey**, this cookie is a festive treat dogs can enjoy during the holiday season.\n\nIt's perfect for **Christmas treat boxes, seasonal markets and holiday gifting**."
+    }
+  };
+
   const trainingFlavorInfo: Record<string, { description: string; ingredients: string[] }> = {
     "Pee-Nutz": {
       description:
-        "Crunchy peanut-butter training treats with a naturally nutty taste dogs love.",
-      ingredients: ["Peanut butter", "Oat flour", "Egg", "Coconut oil"],
+        "Tiny peanut butter training treats specially baked for training and enrichment activities.",
+      ingredients: ["Dog friendly peanut butter", "Oat flour", "Egg"],
     },
     "Tuna Puffs": {
       description:
-        "Savory fishy bites made for high-value rewards during training sessions.",
-      ingredients: ["Tuna", "Oat flour", "Egg", "Coconut oil"],
+        "Soft tuna & flaxseed training bites made with tuna in spring water and flaxseed.",
+      ingredients: ["Spring water tuna", "Oat flour", "Egg", "Flaxseed"],
     },
     "Cheesy Bites": {
       description:
-        "Cheese-forward mini treats for dogs who respond best to rich, savory flavors.",
-      ingredients: ["Cheese", "Oat flour", "Egg", "Coconut oil"],
+        "Soft mozzarella training treats made with grated mozzarella and a touch of turmeric.",
+      ingredients: ["Cheese", "Oat flour", "Egg"],
     },
   };
   const selectedTrainingFlavorInfo = trainingFlavorInfo[selectedTrainingFlavor];
@@ -185,7 +236,7 @@ export default function ProductPage() {
       setSelectedCakeFlavor("Apple & Carrot");
       setSelectedTrainingFlavor("Pee-Nutz");
       setSelectedTrainingPack("1 Pack");
-      setSelectedPackOption("1 Pack");
+      setSelectedPackOption(product.name === "Woofles" ? "4 Packs" : "1 Pack");
       setSelectedPupcakeBox("Box of 2");
     }
   }, [product?.id, parsedVariants]);
@@ -219,27 +270,41 @@ export default function ProductPage() {
     }
 
     const barkdayBoxImages = [
-      "https://i.ibb.co/0gpzNsx/image.png",
+      "https://i.postimg.cc/PJVJF3xg/Whats-App-Image-2026-03-14-at-19-13-35.jpg",
       "https://i.ibb.co/x8PrBc28/image.png",
       "https://i.ibb.co/jPy7JDvm/image.png",
+      "https://i.postimg.cc/6qbq1jq9/Whats-App-Image-2026-03-14-at-19-13-18.jpg",
     ];
     const cakeDesignImages: Record<string, string[]> = {
       "Drip Design": [
         "https://i.ibb.co/Fkkf5xrD/image.png",
         "https://i.ibb.co/HDJrVNJ3/image.png",
       ],
-      "Standard Non-Personalised": [
+      "Standard Personalised": [
         "https://i.ibb.co/HDNsKRS2/image.png",
         "https://i.ibb.co/G3pYK2Z8/image.png",
+      ],
+      "Bone Shaped Design": [
+        "https://i.postimg.cc/zBT4c9PF/Chat-GPT-Image-Mar-14-2026-06-46-24-PM.png",
+        "https://i.postimg.cc/cJVg614N/Whats-App-Image-2025-10-15-at-21-35-32-(7).jpg",
+        "https://i.postimg.cc/KYdk4cv2/Whats-App-Image-2025-10-15-at-21-35-34-(8).jpg",
+        "https://i.postimg.cc/9X6BLL35/Whats-App-Image-2026-03-10-at-18-12-46.jpg",
+        "https://i.postimg.cc/MZCY9dC4/Whats-App-Image-2026-03-10-at-18-12-46(1).jpg",
+      ],
+      "Deluxe/Bespoke": [
+        "https://i.postimg.cc/YCzNZx43/Whats-App-Image-2025-10-15-at-21-35-34-(4).jpg",
+        "https://i.postimg.cc/T1YmYBxC/Whats-App-Image-2025-10-15-at-21-35-34-(9).jpg",
+        "https://i.postimg.cc/ZKnV9GxK/Whats-App-Image-2026-03-10-at-18-14-15.jpg",
+        "https://i.postimg.cc/5NynHhS9/Whats-App-Image-2026-03-10-at-18-14-15(1).jpg",
+        "https://i.postimg.cc/65qY7kfB/Whats-App-Image-2026-03-10-at-18-17-05.jpg",
       ],
     };
     const defaultCakeImages = [
       "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg",
       "https://i.postimg.cc/V6FnwmxG/Whats-App-Image-2025-10-15-at-21-35-32-(3).jpg",
-      "https://i.postimg.cc/B6CH34rw/Whats-App-Image-2025-10-15-at-21-35-32-(4).jpg",
       "https://i.postimg.cc/LXVLS2cQ/Whats-App-Image-2025-10-15-at-21-35-32-(6).jpg",
       "https://i.postimg.cc/JnQZ8Mf2/Whats-App-Image-2025-10-15-at-21-35-34-(3).jpg",
-      "https://i.postimg.cc/Hns5sFm2/Whats-App-Image-2025-10-15-at-21-35-34-(4).jpg",
+      "https://i.postimg.cc/YCzNZx43/Whats-App-Image-2025-10-15-at-21-35-34-(4).jpg",
       "https://i.postimg.cc/ZnK3KXmj/Whats-App-Image-2025-10-15-at-21-35-34-(5).jpg",
       "https://i.postimg.cc/yxY9Y2KL/Whats-App-Image-2025-10-15-at-21-35-34-(6).jpg",
       "https://i.postimg.cc/T1YmYBxC/Whats-App-Image-2025-10-15-at-21-35-34-(9).jpg",
@@ -259,6 +324,16 @@ export default function ProductPage() {
       return pupcakesImages;
     }
     if (isCake && selectedDesign && cakeDesignImages[selectedDesign]?.length) {
+      // For Standard Personalised, show specific image based on size
+      if (selectedDesign === "Standard Personalised") {
+        const images = cakeDesignImages[selectedDesign];
+        if (selectedSize === "6 inch") {
+          return [images[0]]; // First image for 6 inch
+        } else if (selectedSize === "3 inch") {
+          return [images[1]]; // Second image for 3 inch
+        }
+        return images; // Show both if no specific size selected
+      }
       return cakeDesignImages[selectedDesign];
     }
     if (useCakeSelectors && !selectedDesign) {
@@ -282,6 +357,7 @@ export default function ProductPage() {
   }, [
     product,
     selectedDesign,
+    selectedSize,
     isCake,
     isPupcakes,
     isDognuts,
@@ -342,11 +418,11 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-36 pb-24">
+      <main className="flex-1 pt-24 sm:pt-32 lg:pt-36 pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground shadow-soft hover:shadow-soft-hover transition-all duration-300 hover:-translate-y-0.5 mt-8 mb-6 text-lg"
+            className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-primary text-primary-foreground shadow-soft hover:shadow-soft-hover transition-all duration-300 hover:-translate-y-0.5 mt-4 sm:mt-8 mb-4 sm:mb-6 text-base sm:text-lg relative z-10"
           >
             Back to shop
           </Link>
@@ -378,9 +454,20 @@ export default function ProductPage() {
 
             <div className="space-y-5">
               <div>
-                <h1 className="text-4xl font-display font-bold text-accent">{product.name}</h1>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-4xl font-display font-bold text-accent">{product.name}</h1>
+                  {isPupcakes && (
+                    <span className="text-sm font-semibold uppercase tracking-wide text-red-600">
+                      Collection only
+                    </span>
+                  )}
+                </div>
                 <p className="text-3xl font-bold text-primary mt-1">
-                  EUR {(Number(selectedVariant?.price ?? product.price) || 0).toFixed(2)}
+                  {isDeluxe ? "From 80 euros" : 
+                   isBoneShaped ? 
+                     (selectedCakeFlavor === "Chicken & Spinach" || selectedCakeFlavor === "Red Velvet (Beef & Beetroot)" ? 
+                       "From 70 euros" : "From 65 euros") :
+                     `EUR ${(Number(selectedVariant?.price ?? product.price) || 0).toFixed(2)}`}
                 </p>
               </div>
 
@@ -406,6 +493,19 @@ export default function ProductPage() {
                     ))}
                     <button
                       onClick={() => {
+                        setSelectedDesign("Bone Shaped Design");
+                        setSelectedImage(0);
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition-colors ${
+                        selectedDesign === "Bone Shaped Design"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-semibold text-sm">Bone Shaped Design</div>
+                    </button>
+                    <button
+                      onClick={() => {
                         setSelectedDesign("Deluxe/Bespoke");
                         setSelectedImage(0);
                       }}
@@ -419,7 +519,7 @@ export default function ProductPage() {
                     </button>
                   </div>
 
-                  {!isDeluxe && (
+                  {!isDeluxe && !isBoneShaped && (
                     <>
                       <h2 className="font-display font-bold text-accent mb-2">Flavor</h2>
                       <div className="flex flex-wrap gap-2 mb-4">
@@ -470,7 +570,13 @@ export default function ProductPage() {
 
                   {isDeluxe && (
                     <div className="mt-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-accent">
-                      Email us at thewoofingoven@gmail.com for an order.
+                      Bespoke cakes are made to your imagination that's why we require more information to get these done to you. Email us at thewoofingoven@gmail.com for an order.
+                    </div>
+                  )}
+
+                  {isBoneShaped && (
+                    <div className="mt-2 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-accent">
+                      Bone shaped design variant - perfect for big pawtys (daycare, anniversaries and big celebrations)! Email us at thewoofingoven@gmail.com for an order.
                     </div>
                   )}
                 </div>
@@ -510,12 +616,20 @@ export default function ProductPage() {
                           <p className="text-sm text-accent/80 mb-2">
                             {selectedTrainingFlavorInfo.description}
                           </p>
-                          <button
-                            onClick={() => setIsFlavorInfoOpen(true)}
-                            className="text-sm font-semibold text-primary hover:underline"
-                          >
-                            View ingredients
-                          </button>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => setIsFlavorInfoOpen(true)}
+                              className="text-sm font-semibold text-primary hover:underline"
+                            >
+                              View ingredients
+                            </button>
+                            <button
+                              onClick={() => setIsBenefitsOpen(true)}
+                              className="text-sm font-semibold text-primary hover:underline"
+                            >
+                              Benefits
+                            </button>
+                          </div>
                         </div>
                       )}
 
@@ -549,7 +663,9 @@ export default function ProductPage() {
                           ? ["Box of 6", "Box of 12"]
                           : isBarkdayBox
                             ? ["Collection", "Delivery"]
-                            : ["1 Pack", "4 Packs"]
+                            : isWoofles
+                              ? ["4 Packs"]
+                              : ["1 Pack", "4 Packs"]
                       ).map((option) => (
                         <button
                           key={option}
@@ -576,13 +692,41 @@ export default function ProductPage() {
 
               <div>
                 <h2 className="font-display font-bold text-accent mb-1">Description</h2>
-                <p className="text-accent/80">{product.description}</p>
+                {(() => {
+                  const productDesc = productDescriptions[product.name];
+                  if (productDesc) {
+                    return (
+                      <div>
+                        <p className="text-accent/80 mb-2">{productDesc.short}</p>
+                        {productDesc.full.length > productDesc.short.length && (
+                          <button
+                            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                            className="inline-flex items-center gap-1 text-primary font-semibold hover:underline text-sm"
+                          >
+                            {isDescriptionExpanded ? "Show less" : "Read more"}
+                            {isDescriptionExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+                        )}
+                        {isDescriptionExpanded && (
+                          <div className="mt-3 p-4 bg-secondary/30 rounded-2xl">
+                            <div className="text-accent/80 whitespace-pre-line">
+                              {productDesc.full.split('**').map((part, index) => 
+                                index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return <p className="text-accent/80">{product.description}</p>;
+                })()}
               </div>
 
               <Button
                 className="w-full gap-2"
                 onClick={() => {
-                  if (isDeluxe) return;
+                  if (isDeluxe || isBoneShaped) return;
                   const cartVariant = selectedVariant
                     ? {
                         id: selectedVariant.id,
@@ -600,10 +744,10 @@ export default function ProductPage() {
                       : undefined;
                   addItem(product, cartVariant, 1, customization);
                 }}
-                disabled={isDeluxe}
+                disabled={isDeluxe || isBoneShaped}
               >
                 <ShoppingBag size={18} />
-                {isDeluxe ? "Email to Order" : "Add to Cart"}
+                {isDeluxe || isBoneShaped ? "Email to Order" : "Add to Cart"}
               </Button>
             </div>
           </div>
@@ -631,6 +775,32 @@ export default function ProductPage() {
               ))}
             </ul>
             <Button className="w-full" onClick={() => setIsFlavorInfoOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isTrainingTreats && isBenefitsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setIsBenefitsOpen(false)}
+          />
+          <div className="relative w-full max-w-lg rounded-3xl bg-white p-6 shadow-xl">
+            <h3 className="text-2xl font-display font-bold text-accent mb-4">
+              Benefits of Training Treats
+            </h3>
+            <div className="space-y-3 mb-6 text-sm text-accent/80">
+              <p><strong>Perfect size for training</strong> – small bites allow frequent rewards without overfeeding.</p>
+              <p><strong>Highly motivating flavours</strong> – strong natural aromas (peanut butter, tuna, cheese, liver) help keep your dog focused and engaged during training.</p>
+              <p><strong>Soft, easy-to-chew texture</strong> – suitable for puppies, small breeds, and senior dogs.</p>
+              <p><strong>Quick to eat</strong> – dogs can swallow them quickly and stay focused on the next command instead of chewing for long.</p>
+              <p><strong>Gentle ingredients</strong> – made with oat flour and simple, dog-friendly ingredients that are easy on digestion.</p>
+              <p><strong>Ideal for enrichment toys</strong> – their small size makes them perfect for snuffle mats, puzzle toys, and training games.</p>
+              <p><strong>Great for positive reinforcement</strong> – helps reinforce good behaviour and build strong training habits.</p>
+            </div>
+            <Button className="w-full" onClick={() => setIsBenefitsOpen(false)}>
               Close
             </Button>
           </div>

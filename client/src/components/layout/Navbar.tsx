@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, ChevronDown } from "lucide-react";
 import { useCart } from "@/store/use-cart";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isBusinessMenuOpen, setIsBusinessMenuOpen] = useState(false);
   const { getCartCount, isDrawerOpen, openDrawer, closeDrawer } = useCart();
   const cartCount = getCartCount();
   const [location] = useLocation();
@@ -20,6 +21,7 @@ export function Navbar() {
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsBusinessMenuOpen(false);
   }, [location]);
 
   // Handle initial page load with hash fragments
@@ -60,9 +62,40 @@ export function Navbar() {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },
-    { name: "Barkday Cakes", path: "/#cakes", sectionId: "cakes" },
+    { name: "FAQ", path: "/faq" },
     { name: "Find Us", path: "/#market", sectionId: "market" },
   ];
+
+  const businessLinks = [
+    { name: "Wholesale", path: "/for-business#wholesale" },
+    { name: "Corporate", path: "/for-business#corporate" },
+    { name: "Catering", path: "/for-business#catering" },
+  ];
+
+  const handleBusinessClick = (hashPath: string) => {
+    const [, hash = ""] = hashPath.split("#");
+
+    if (location !== "/for-business") {
+      window.location.href = hashPath;
+      return;
+    }
+
+    if (!hash) return;
+
+    const element = document.getElementById(hash);
+    if (!element) return;
+
+    window.history.replaceState(null, "", `/for-business#${hash}`);
+    const navbarHeight = 140;
+    const elementPosition = element.offsetTop - navbarHeight;
+    window.scrollTo({
+      top: elementPosition,
+      behavior: "smooth",
+    });
+
+    setIsBusinessMenuOpen(false);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -88,7 +121,7 @@ export function Navbar() {
                 <button
                   key={link.name}
                   onClick={() => handleSectionClick(link.sectionId!)}
-                  className="text-accent/80 font-medium hover:text-primary transition-colors text-lg"
+                  className="text-accent/80 font-medium hover:text-primary transition-colors text-lg font-primary"
                 >
                   {link.name}
                 </button>
@@ -96,12 +129,40 @@ export function Navbar() {
                 <Link
                   key={link.name}
                   href={link.path}
-                  className="text-accent/80 font-medium hover:text-primary transition-colors text-lg"
+                  className="text-accent/80 font-medium hover:text-primary transition-colors text-lg font-primary"
                 >
                   {link.name}
                 </Link>
               )
             ))}
+            <div className="relative">
+              <button
+                onClick={() => setIsBusinessMenuOpen((open) => !open)}
+                className="inline-flex items-center gap-1 text-accent/80 font-medium hover:text-primary transition-colors text-lg font-primary"
+              >
+                For Business
+                <ChevronDown
+                  size={18}
+                  className={`transition-transform ${isBusinessMenuOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isBusinessMenuOpen && (
+                <div className="absolute right-0 top-full mt-4 w-[320px] rounded-[1.5rem] bg-white p-4 shadow-lg border border-border">
+                  <div className="grid gap-3">
+                    {businessLinks.map((link) => (
+                      <button
+                        key={link.name}
+                        onClick={() => handleBusinessClick(link.path)}
+                        className="block rounded-2xl border-2 border-[#F5C842]/25 bg-[#FFF8EE] px-4 py-4 text-[#6B3F1E] hover:border-[#F5C842] hover:bg-[#F5C842]/12 transition-colors"
+                      >
+                        <span className="block font-display text-xl">{link.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Actions */}
@@ -151,6 +212,20 @@ export function Navbar() {
                   </Link>
                 )
               ))}
+              <div className="pt-2 border-t border-border">
+                <div className="text-accent font-medium text-lg mb-3 px-2">For Business</div>
+                <div className="grid gap-3">
+                  {businessLinks.map((link) => (
+                    <button
+                      key={link.name}
+                      onClick={() => handleBusinessClick(link.path)}
+                      className="block rounded-2xl border-2 border-[#F5C842]/25 bg-[#FFF8EE] px-4 py-4 text-[#6B3F1E] font-display text-xl hover:border-[#F5C842] hover:bg-[#F5C842]/12 transition-colors"
+                    >
+                      {link.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 
 export function CakeBuilder() {
   const handleDesignCakeClick = () => {
-    window.location.href = "/shop#cake-product";
+    window.location.href = "/shop/22";
   };
 
   const steps = [

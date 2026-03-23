@@ -9,6 +9,9 @@ import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
 import ProductPage from "@/pages/Product";
 import Checkout from "@/pages/Checkout";
+import FAQ from "@/pages/FAQ";
+import Ingredients from "@/pages/Ingredients";
+import ForBusiness from "@/pages/ForBusiness";
 
 function Router() {
   return (
@@ -17,6 +20,10 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/shop/:id" component={ProductPage} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/faq" component={FAQ} />
+      <Route path="/for-business" component={ForBusiness} />
+      <Route path="/catering" component={ForBusiness} />
+      <Route path="/ingredients" component={Ingredients} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -1,4 +1,116 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Rubik+Bubbles&display=swap');
+/* The Woofing Oven Brand Fonts - Complete Collection */
+
+/* Avenir - Primary Typeface */
+@font-face {
+  font-family: 'Avenir';
+  src: url('/brand_assets/fonts/Avenir.ttc') format('truetype-collection');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+/* FTF Brotein - Display Font for Headings */
+@font-face {
+  font-family: 'FTF Brotein';
+  src: url('/brand_assets/fonts/FTF Brotein (1).ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Hittedal Script - Descriptors/Taglines */
+@font-face {
+  font-family: 'Hittedal Script';
+  src: url('/brand_assets/fonts/Hittedal Script.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Eveleth Regular Family */
+@font-face {
+  font-family: 'Eveleth';
+  src: url('/brand_assets/fonts/Eveleth Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth';
+  src: url('/brand_assets/fonts/Eveleth Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth';
+  src: url('/brand_assets/fonts/Eveleth Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth';
+  src: url('/brand_assets/fonts/Eveleth Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Eveleth Clean Family */
+@font-face {
+  font-family: 'Eveleth Clean';
+  src: url('/brand_assets/fonts/Eveleth Clean Thin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth Clean';
+  src: url('/brand_assets/fonts/Eveleth Clean Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Eveleth Dot Family - For Flavor Descriptors */
+@font-face {
+  font-family: 'Eveleth Dot';
+  src: url('/brand_assets/fonts/Eveleth Dot Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth Dot';
+  src: url('/brand_assets/fonts/Eveleth Dot Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth Dot';
+  src: url('/brand_assets/fonts/Eveleth Dot Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Eveleth Slant Family */
+@font-face {
+  font-family: 'Eveleth Slant';
+  src: url('/brand_assets/fonts/Eveleth Slant Light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth Slant';
+  src: url('/brand_assets/fonts/Eveleth Slant Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Eveleth Slant';
+  src: url('/brand_assets/fonts/Eveleth Slant Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
 
 @tailwind base;
 @tailwind components;
@@ -6,18 +118,23 @@
 
 @layer base {
   :root {
-    /* The Woofing Oven Palette */
-    --background: 36 100% 98%; /* Very soft cream/white */
-    --foreground: 0 0% 13%;    /* Soft black #222222 */
+    /* The Woofing Oven Brand Palette - Exact brand colors from guidelines */
+    --background: 0 0% 100%;   /* Pure white #FFFFFF */
+    --foreground: 16 4% 18%;   /* Brand black #2C2A29 */
     
-    --primary: 36 100% 71%;    /* Warm Golden Yellow #FFC56E */
-    --primary-foreground: 26 30% 32%; /* Accent Brown text on primary */
+    --primary: 36 100% 71%;    /* Base pack colour #FFC56E */
+    --primary-foreground: 16 4% 18%; /* Brand black on primary */
     
-    --secondary: 36 100% 95%;  /* Cream #FFF5E6 */
-    --secondary-foreground: 26 30% 32%; /* Accent Brown */
+    --secondary: 36 100% 95%;  /* Light cream for backgrounds */
+    --secondary-foreground: 16 4% 18%; /* Brand black */
     
-    --accent: 26 30% 32%;      /* Accent Brown #6B4F3A */
-    --accent-foreground: 36 100% 95%; /* Cream */
+    --accent: 16 4% 18%;       /* Brand black #2C2A29 */
+    --accent-foreground: 0 0% 100%; /* Pure white */
+    
+    /* Brand product colors */
+    --carrot-chickpea: 14 72% 47%;  /* #CF4520 */
+    --sweet-potato: 357 48% 38%;    /* #8F3237 */
+    --bright-red: 358 81% 52%;      /* #EC1C24 */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -32,23 +149,32 @@
     
     --radius: 1.5rem; /* Playful, large border radius */
 
-    --font-display: 'Rubik Bubbles', sans-serif;
-    --font-sans: 'Fredoka', sans-serif;
+    /* Brand Typography Hierarchy */
+    --font-primary: 'Avenir', system-ui, -apple-system, sans-serif;      /* Primary: Body text, general use */
+    --font-display: 'FTF Brotein', cursive;                              /* Display: Playful headings/titles */
+    --font-script: 'Hittedal Script', cursive;                           /* Script: Taglines like "Bake, Bark, Love!" */
+    --font-caps: 'Eveleth Dot', sans-serif;                             /* Caps: Flavor descriptors, all-caps text */
+    --font-eveleth: 'Eveleth', sans-serif;                              /* Eveleth Regular family */
+    --font-eveleth-clean: 'Eveleth Clean', sans-serif;                  /* Eveleth Clean family */
+    --font-eveleth-slant: 'Eveleth Slant', sans-serif;                  /* Eveleth Slant family */
   }
 
   /* Force light mode only as requested */
   .dark {
     /* Mirroring light mode to strictly prevent dark theme */
-    --background: 36 100% 98%; 
-    --foreground: 0 0% 13%;    
-    --primary: 36 100% 71%;    
-    --primary-foreground: 26 30% 32%; 
-    --secondary: 36 100% 95%;  
-    --secondary-foreground: 26 30% 32%; 
-    --accent: 26 30% 32%;      
-    --accent-foreground: 36 100% 95%; 
+    --background: 0 0% 100%;
+    --foreground: 16 4% 18%;
+    --primary: 36 100% 71%;
+    --primary-foreground: 16 4% 18%;
+    --secondary: 36 100% 95%;
+    --secondary-foreground: 16 4% 18%;
+    --accent: 16 4% 18%;
+    --accent-foreground: 0 0% 100%;
+    --carrot-chickpea: 14 72% 47%;
+    --sweet-potato: 357 48% 38%;
+    --bright-red: 358 81% 52%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 16 4% 18%;
     --border: 36 40% 90%;
     --input: 36 40% 90%;
     --ring: 36 100% 71%;
@@ -56,7 +182,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
+    font-family: var(--font-primary);
     /* Subtle paw print watermark pattern using radial gradients */
     background-image: radial-gradient(var(--secondary) 2px, transparent 2px), radial-gradient(var(--secondary) 2px, transparent 2px);
     background-size: 60px 60px;
@@ -65,7 +191,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    @apply font-semibold tracking-tight text-accent;
+    @apply font-normal tracking-tight text-accent;
   }
 }
 
@@ -75,5 +201,49 @@
   }
   .shadow-soft-hover {
     box-shadow: 0 20px 50px -15px rgba(107, 79, 58, 0.15);
+  }
+  
+  /* Brand Typography Utilities */
+  .font-primary {
+    font-family: var(--font-primary);
+  }
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-script {
+    font-family: var(--font-script);
+  }
+  .font-caps {
+    font-family: var(--font-caps);
+    text-transform: uppercase;
+  }
+  .font-eveleth {
+    font-family: var(--font-eveleth);
+  }
+  .font-eveleth-clean {
+    font-family: var(--font-eveleth-clean);
+  }
+  .font-eveleth-slant {
+    font-family: var(--font-eveleth-slant);
+  }
+  
+  /* Brand Color Utilities */
+  .text-carrot-chickpea {
+    color: hsl(var(--carrot-chickpea));
+  }
+  .text-sweet-potato {
+    color: hsl(var(--sweet-potato));
+  }
+  .text-bright-red {
+    color: hsl(var(--bright-red));
+  }
+  .bg-carrot-chickpea {
+    background-color: hsl(var(--carrot-chickpea));
+  }
+  .bg-sweet-potato {
+    background-color: hsl(var(--sweet-potato));
+  }
+  .bg-bright-red {
+    background-color: hsl(var(--bright-red));
   }
 }

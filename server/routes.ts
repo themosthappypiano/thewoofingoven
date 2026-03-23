@@ -46,15 +46,16 @@ async function seedDatabase() {
         name: "Doggy Birthday Cake",
         description: "Birthday cakes in 3, 4, and 6 inch sizes with protein or non-protein bases. Standard, personalised, and drip designs available.",
         basePrice: "35.00",
-        imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at21.35.32_4.jpg?v=1765216387",
+        imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg",
         category: "cake",
         isFeatured: true,
       }
     ];
 
-    const { db } = await import("./db");
+    const { db: dbPromise } = await import("./db");
     const { products, reviews } = await import("@shared/schema");
-    
+    const db = await dbPromise;
+
     await db.insert(products).values(sampleProducts);
 
     const existingReviews = await storage.getReviews();
@@ -211,10 +212,9 @@ export async function registerRoutes(
 
   app.get(api.products.get.path, async (req, res) => {
     try {
-      const productId = Number(req.params.id);
-      if (Number.isNaN(productId)) {
-        return res.status(404).json({ message: "Product not found" });
-      }
+      const productParam = String(req.params.id || "").trim();
+      const productId = Number(productParam);
+      const isNumericId = !Number.isNaN(productId);
 
       try {
         const { createClient } = await import('@supabase/supabase-js');
@@ -223,18 +223,20 @@ export async function registerRoutes(
           process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
         );
 
-        const { data: supabaseProduct, error: productError } = await supabase
+        const productQuery = supabase
           .from('products')
           .select('*')
-          .eq('id', productId)
-          .limit(1)
-          .maybeSingle();
+          .limit(1);
+
+        const { data: supabaseProduct, error: productError } = await (isNumericId
+          ? productQuery.eq('id', productId).maybeSingle()
+          : productQuery.eq('name', productParam).maybeSingle());
 
         if (!productError && supabaseProduct) {
           const { data: supabaseVariants } = await supabase
             .from('product_variants')
             .select('*')
-            .eq('product_id', productId);
+            .eq('product_id', supabaseProduct.id);
 
           return res.json(mapProduct(supabaseProduct, supabaseVariants || []));
         }
@@ -243,12 +245,16 @@ export async function registerRoutes(
       }
 
       const db = await dbPromise;
-      const product = await db.select().from(products).where(eq(products.id, productId)).limit(1);
+      const product = await (isNumericId
+        ? db.select().from(products).where(eq(products.id, productId)).limit(1)
+        : db.select().from(products).then((rows: any[]) =>
+            rows.filter((row) => row.name === productParam).slice(0, 1)
+          ));
       if (product.length > 0) {
         const variants = await db
           .select()
           .from(productVariants)
-          .where(eq(productVariants.productId, productId));
+          .where(eq(productVariants.productId, product[0].id));
         return res.json(
           mapProduct(
             {

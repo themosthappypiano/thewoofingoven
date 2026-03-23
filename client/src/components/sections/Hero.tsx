@@ -6,24 +6,6 @@ import { useState, useEffect } from "react";
 export function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const handleBookCakeClick = () => {
-    if (window.location.pathname !== "/") {
-      window.location.href = "/#cakes";
-      return;
-    }
-
-    const element = document.getElementById("cakes");
-    if (!element) return;
-
-    const navbarHeight = 120;
-    const extraOffset = 60;
-    const elementPosition = element.offsetTop - navbarHeight - extraOffset;
-
-    window.scrollTo({
-      top: elementPosition,
-      behavior: "smooth",
-    });
-  };
   
   const heroImages = [
     "https://i.ibb.co/kdygfZG/Chat-GPT-Image-Feb-25-2026-07-05-20-AM.png",
@@ -56,12 +38,16 @@ export function Hero() {
               <span>Ireland’s No.1 Dog Bakery 🐾</span>
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-accent leading-[1.1]">
+            <div className="text-center md:text-left mb-4">
+              <p className="text-2xl font-script text-primary mb-2">Bake, Bark, Love!</p>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-display text-accent leading-[1.1]">
               Freshly Baked <br/>
               <span className="text-primary">Joy</span> for Dogs.
             </h1>
             
-            <p className="text-lg md:text-xl text-accent/80 max-w-lg mx-auto md:mx-0">
+            <p className="text-lg md:text-xl text-accent/80 max-w-lg mx-auto md:mx-0 font-primary">
               100% natural, human-grade treats and custom Barkday cakes baked fresh in Dublin. Because they deserve the best.
             </p>
             
@@ -71,14 +57,15 @@ export function Hero() {
                   Shop All Treats
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full sm:w-auto"
-                onClick={handleBookCakeClick}
-              >
-                Book a Barkday Cake
-              </Button>
+              <Link href="/shop/22">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                >
+                  Book a Barkday Cake
+                </Button>
+              </Link>
             </div>
             
             <div className="pt-4 flex items-center justify-center md:justify-start gap-4 text-sm font-medium text-accent/60">
@@ -129,8 +116,8 @@ export function Hero() {
                 🧁
               </div>
               <div>
-                <p className="font-bold text-accent font-display leading-tight">Over 5,000</p>
-                <p className="text-sm text-accent/60">Happy Dogs</p>
+                <p className="font-bold text-accent font-display leading-tight">Over 1,000</p>
+                <p className="text-sm text-accent/60 font-primary">Happy Dogs</p>
               </div>
             </div>
           </div>

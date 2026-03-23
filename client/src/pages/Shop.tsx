@@ -32,11 +32,11 @@ export default function Shop() {
   // Mock data fallback
   const displayProducts = products?.length ? products : [
     { id: 1, name: "Barkday Box", price: "30.00", category: "box", imageUrl: "https://i.ibb.co/0gpzNsx/image.png", variants: [{ id: "fallback-box-collect", name: "Collection", price: "30.00", shippingRequired: false }] },
-    { id: 2, name: "Woofles", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
+    { id: 2, name: "Woofles", price: "40.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-4", name: "4 Packs", price: "40.00", shippingRequired: false }] },
     { id: 3, name: "Training Treats", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
     { id: 4, name: "Pupcakes", price: "7.20", category: "cake", imageUrl: "https://placehold.co/500x500?text=Pupcakes", variants: [{ id: "fallback-pup-2", name: "Box of 2", price: "7.20", shippingRequired: false }] },
     { id: 5, name: "Dognuts", price: "19.80", category: "treat", imageUrl: "https://placehold.co/500x500?text=Dognuts", variants: [{ id: "fallback-dognut-6", name: "Box of 6", price: "19.80", shippingRequired: false }] },
-    { id: 6, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at21.35.32_4.jpg?v=1765216387", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
+    { id: 6, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
   ];
 
   return (
@@ -69,11 +69,21 @@ export default function Shop() {
                           ? "https://i.ibb.co/0gpzNsx/image.png"
                           : product.imageUrl;
                 const pupcakesDefaultVariant = product.name === "Pupcakes"
-                  ? product.variants?.find((variant: any) => variant.name?.includes("Box of 2"))
+                  ? product.variants?.find((variant: any) => variant.name === "Box of 2" || variant.name === "Apple & Carrot - Box of 2 - Pack")
+                  : undefined;
+                const wooflesDefaultVariant = product.name === "Woofles"
+                  ? product.variants?.find((variant: any) => variant.name.includes("4 Pack"))
                   : undefined;
                 const displayPrice = Number(
-                  pupcakesDefaultVariant?.price ?? product.variants?.[0]?.price ?? product.price
+                  pupcakesDefaultVariant?.price ??
+                  wooflesDefaultVariant?.price ??
+                  product.variants?.find((v: any) => v.name === "Box of 2")?.price ??
+                  product.price
                 ) || 0;
+                const defaultCartVariant =
+                  product.name === "Woofles"
+                    ? wooflesDefaultVariant || product.variants?.[0]
+                    : product.variants?.[0];
                 return (
                 <div
                   key={product.id}
@@ -99,7 +109,7 @@ export default function Shop() {
                   <div className="flex gap-2">
                     <Button 
                       className="flex-1 gap-2" 
-                      onClick={() => addItem(product, product.variants?.[0])}
+                      onClick={() => addItem(product, defaultCartVariant)}
                     >
                       <ShoppingBag size={18} />
                       Add to Cart

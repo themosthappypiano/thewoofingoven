@@ -11,9 +11,9 @@ export function FeaturedProducts() {
   // Mock data fallback if backend fails/empty during development
   const displayProducts = products?.length ? products.slice(0, 4) : [
     { id: 1, name: "Barkday Box", price: "30.00", category: "box", imageUrl: "https://i.ibb.co/0gpzNsx/image.png", variants: [{ id: "fallback-box-collect", name: "Collection", price: "30.00", shippingRequired: false }] },
-    { id: 2, name: "Woofles", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
+    { id: 2, name: "Woofles", price: "40.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-4", name: "4 Packs", price: "40.00", shippingRequired: false }] },
     { id: 3, name: "Training Treats", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
-    { id: 4, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at21.35.32_4.jpg?v=1765216387", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
+    { id: 4, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
   ] as any[];
 
   return (
@@ -21,8 +21,8 @@ export function FeaturedProducts() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-accent mb-4">Fresh from the Oven</h2>
-            <p className="text-lg text-accent/70 max-w-2xl">Handcrafted treats made with love. No preservatives, no nasties, just pure goodness.</p>
+            <h2 className="text-4xl md:text-5xl font-display text-accent mb-4">Fresh from the Oven</h2>
+            <p className="text-lg text-accent/70 max-w-2xl font-primary">Handcrafted treats made with love. No preservatives, no nasties, just pure goodness.</p>
           </div>
           <Link href="/shop" className="hidden md:block">
             <Button variant="outline">View All Treats</Button>
@@ -52,11 +52,31 @@ export function FeaturedProducts() {
                 <div className="space-y-2 mb-4">
                   <Link
                     href={`/shop/${encodeURIComponent(product.handle || product.id)}`}
-                    className="font-display font-bold text-xl text-accent leading-tight cursor-pointer hover:text-primary transition-colors block"
+                    className="font-display text-xl text-accent leading-tight cursor-pointer hover:text-primary transition-colors block"
                   >
                     {product.name}
                   </Link>
-                  <p className="text-primary font-bold text-lg">€{(Number(product.price) || 0).toFixed(2)}</p>
+                  
+                  {/* Sample flavor badges using different Eveleth fonts */}
+                  {product.name === "Woofles" && (
+                    <div className="flex gap-1 flex-wrap">
+                      <span className="px-2 py-1 bg-carrot-chickpea/10 text-carrot-chickpea rounded-lg text-xs font-caps">
+                        Carrots & Chickpea
+                      </span>
+                      <span className="px-2 py-1 bg-sweet-potato/10 text-sweet-potato rounded-lg text-xs font-eveleth-clean">
+                        Sweet Potato
+                      </span>
+                    </div>
+                  )}
+                  {product.name === "Training Treats" && (
+                    <div className="flex gap-1">
+                      <span className="px-2 py-1 bg-primary/10 text-accent rounded-lg text-xs font-eveleth-slant">
+                        Natural & Healthy
+                      </span>
+                    </div>
+                  )}
+                  
+                  <p className="text-primary font-bold text-lg font-primary">€{(Number(product.price) || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button 

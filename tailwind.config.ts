@@ -83,8 +83,19 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Fredoka", "sans-serif"],
-        display: ["Rubik Bubbles", "sans-serif"],
+        // Brand Typography Hierarchy
+        primary: ["var(--font-primary)"],           // Avenir - body text, general use
+        display: ["var(--font-display)"],           // FTF Brotein - playful headings/titles
+        script: ["var(--font-script)"],             // Hittedal Script - taglines like "Bake, Bark, Love!"
+        caps: ["var(--font-caps)"],                 // Eveleth Dot - flavor descriptors, all-caps text
+        
+        // Eveleth Font Family Variants
+        eveleth: ["var(--font-eveleth)"],           // Eveleth Regular family
+        "eveleth-clean": ["var(--font-eveleth-clean)"], // Eveleth Clean family
+        "eveleth-slant": ["var(--font-eveleth-slant)"], // Eveleth Slant family
+        
+        // Legacy fallbacks
+        sans: ["var(--font-primary)"],
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },
