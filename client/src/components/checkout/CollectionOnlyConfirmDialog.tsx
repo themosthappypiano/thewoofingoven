@@ -30,11 +30,11 @@ export function CollectionOnlyConfirmDialog({
               Collection Only
             </DialogTitle>
             <DialogDescription className="text-accent/80 pt-3 whitespace-pre-line text-base sm:text-lg leading-relaxed">
-              <span className="font-semibold text-accent">{productName}</span> is collection only.
+              <span className="font-semibold text-accent">{productName}</span> are freshly made and available for collection only.
               {"\n\n"}
-              Because this product is made fresh, delivery is not available.
+              To keep them at their best quality, we do not offer delivery for these items.
               {"\n"}
-              Please confirm you understand this item must be collected.
+              Please confirm you are happy to collect your order.
             </DialogDescription>
           </DialogHeader>
 
