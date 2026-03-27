@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 
 const NEWSLETTER_IMAGE_URL =
   "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=1200&q=80&auto=format&fit=crop";
+const NEWSLETTER_POPUP_SEEN_KEY = "woofing-oven-newsletter-popup-seen";
+const NEWSLETTER_POPUP_SUBSCRIBED_KEY = "woofing-oven-newsletter-popup-subscribed";
 
 export function NewsletterPopup() {
   const [location] = useLocation();
@@ -15,7 +17,13 @@ export function NewsletterPopup() {
 
   useEffect(() => {
     if (location === "/checkout") return;
+    if (typeof window === "undefined") return;
+    if (window.localStorage.getItem(NEWSLETTER_POPUP_SEEN_KEY)) return;
+    if (window.localStorage.getItem(NEWSLETTER_POPUP_SUBSCRIBED_KEY)) return;
+
     const timer = window.setTimeout(() => setIsOpen(true), 1400);
+
+    window.localStorage.setItem(NEWSLETTER_POPUP_SEEN_KEY, "true");
     return () => window.clearTimeout(timer);
   }, [location]);
 
@@ -82,6 +90,8 @@ export function NewsletterPopup() {
 
       setIsOpen(false);
       setEmail("");
+      window.localStorage.setItem(NEWSLETTER_POPUP_SUBSCRIBED_KEY, "true");
+      window.localStorage.setItem(NEWSLETTER_POPUP_SEEN_KEY, "true");
       toast({
         title: "You're subscribed",
         description: "We will send product drops and exclusive offers to your inbox.",
