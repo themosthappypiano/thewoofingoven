@@ -37,15 +37,68 @@ export function FeaturedProducts() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {displayProducts.map((product: any) => (
+            {displayProducts.map((product: any) => {
+              const isPlaceholderImageUrl = (url?: string) => {
+                if (!url) return true;
+                const normalized = String(url).toLowerCase();
+                return (
+                  normalized.includes("placehold.co") ||
+                  normalized.includes("placeholder") ||
+                  normalized.includes("text=the%20woofing%20oven") ||
+                  normalized.includes("text=the+woofing+oven")
+                );
+              };
+              const parsedImageUrls = Array.isArray(product.imageUrls)
+                ? product.imageUrls
+                : typeof product.imageUrls === "string"
+                  ? (() => {
+                      try {
+                        const parsed = JSON.parse(product.imageUrls);
+                        return Array.isArray(parsed) ? parsed : [];
+                      } catch {
+                        return [];
+                      }
+                    })()
+                  : [];
+              const variantImage = product.variants?.find((variant: any) => !isPlaceholderImageUrl(variant?.imageUrl))?.imageUrl;
+              const curatedImageFallbacks: Record<string, string> = {
+                Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+                Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
+                Woofles: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392",
+                "Barkday Box": "https://i.postimg.cc/PJVJF3xg/Whats-App-Image-2026-03-14-at-19-13-35.jpg",
+                "Doggy Birthday Cake": "https://i.postimg.cc/ZqX1PprN/Whats-App-Image-2025-10-15-at-21-35-26.jpg",
+              };
+              const firstValidImageUrl = parsedImageUrls.find((url: string) => !isPlaceholderImageUrl(url));
+              const productCardOverrideImage = curatedImageFallbacks[product.name];
+              const resolvedImage =
+                productCardOverrideImage ||
+                variantImage ||
+                firstValidImageUrl ||
+                (!isPlaceholderImageUrl(product.imageUrl) ? product.imageUrl : "") ||
+                curatedImageFallbacks[product.name] ||
+                `https://placehold.co/500x500?text=${encodeURIComponent(product.name)}`;
+              const finalFallbackImage =
+                curatedImageFallbacks[product.name] ||
+                `https://placehold.co/500x500?text=${encodeURIComponent(product.name)}`;
+
+              return (
               <div key={product.id} className="group relative bg-white border border-border rounded-3xl p-4 shadow-sm hover:shadow-soft-hover transition-all duration-300 hover:-translate-y-1">
                 <Link
                   href={`/shop/${encodeURIComponent(product.handle || product.id)}`}
                   className="block aspect-square rounded-2xl overflow-hidden mb-4 bg-secondary cursor-pointer"
                 >
                   <img 
-                    src={product.imageUrl} 
+                    src={resolvedImage} 
                     alt={product.name} 
+                    onError={(event) => {
+                      const img = event.currentTarget;
+                      if (img.src !== finalFallbackImage) {
+                        img.src = finalFallbackImage;
+                        return;
+                      }
+                      img.onerror = null;
+                      img.src = `https://placehold.co/500x500?text=${encodeURIComponent(product.name)}`;
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </Link>
@@ -93,7 +146,8 @@ export function FeaturedProducts() {
                   </Link>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
         

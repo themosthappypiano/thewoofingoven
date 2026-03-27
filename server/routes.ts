@@ -89,6 +89,15 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  const newsletterInputSchema = z.object({
+    email: z.string().email(),
+  });
+
+  const airtablePat = process.env.AIRTABLE_PAT || "";
+  const airtableBaseId = process.env.AIRTABLE_BASE_ID || "appZ9heO1salfHYMa";
+  const airtableTableId = process.env.AIRTABLE_TABLE_ID || "tbl2xJrAnilq5dAII";
+  const airtableFieldName = process.env.AIRTABLE_EMAIL_FIELD || "Email";
+
   const canonicalDescriptions: Record<string, string> = {
     "Doggy Birthday Cake":
       "Celebrate your pup in style with our freshly baked birthday cakes, available in 3, 4, and 6 inch sizes with your choice of protein or non-protein bases. Pick from standard, personalised, or drip designs to make their big day extra special. Handmade with dog-friendly ingredients and baked with love. Dublin delivery available for cakes, or collection.",
@@ -313,6 +322,74 @@ export async function registerRoutes(
     res.json(reviews);
   });
 
+  app.post("/api/newsletter/subscribe", async (req, res) => {
+    try {
+      const { email } = newsletterInputSchema.parse(req.body);
+      console.log("[newsletter] incoming subscribe request", {
+        email,
+        hasPat: Boolean(airtablePat),
+        baseId: airtableBaseId,
+        tableId: airtableTableId,
+        fieldName: airtableFieldName,
+      });
+
+      if (!airtablePat) {
+        console.error("[newsletter] missing AIRTABLE_PAT");
+        return res.status(500).json({
+          message: "Newsletter is not configured. Missing AIRTABLE_PAT.",
+        });
+      }
+
+      const endpoint = `https://api.airtable.com/v0/${encodeURIComponent(airtableBaseId)}/${encodeURIComponent(airtableTableId)}`;
+      const payload = {
+        records: [
+          {
+            fields: {
+              [airtableFieldName]: email,
+            },
+          },
+        ],
+      };
+
+      const airtableResponse = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${airtablePat}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const airtableBody = await airtableResponse.json();
+      console.log("[newsletter] airtable response", {
+        status: airtableResponse.status,
+        ok: airtableResponse.ok,
+        body: airtableBody,
+      });
+      if (!airtableResponse.ok) {
+        const message =
+          airtableBody?.error?.message ||
+          airtableBody?.message ||
+          "Failed to save newsletter subscription.";
+        console.error("[newsletter] airtable rejected request", { message });
+        return res.status(400).json({ message });
+      }
+
+      console.log("[newsletter] saved subscriber", { email });
+      return res.json({ success: true });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        console.error("[newsletter] invalid email payload", { issues: error.issues });
+        return res.status(400).json({ message: "Please enter a valid email address." });
+      }
+
+      console.error("[newsletter] unexpected error", { message: error?.message, error });
+      return res.status(500).json({
+        message: error?.message || "Failed to subscribe to newsletter.",
+      });
+    }
+  });
+
   // Create Stripe checkout session
   app.post("/api/checkout/create-session", async (req, res) => {
     try {
@@ -428,6 +505,10 @@ export async function registerRoutes(
       }
 
       // Real Stripe checkout session
+      const collectionMessage =
+        "Collection: Monday to Saturday at our kitchen in Rathcoole, Dublin 24. Sundays at People's Park, Dun Laoghaire.";
+      const deliveryMessage = "Shipping via An Post. Delivery in 3-5 business days for EUR 6.99.";
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         mode: 'payment',
@@ -441,6 +522,23 @@ export async function registerRoutes(
         shipping_address_collection: deliveryType === 'delivery' ? {
           allowed_countries: ['IE'],
         } : undefined,
+        custom_text: deliveryType === 'delivery'
+          ? {
+              shipping_address: {
+                message: deliveryMessage,
+              },
+              submit: {
+                message: deliveryMessage,
+              },
+            }
+          : {
+              submit: {
+                message: collectionMessage,
+              },
+              after_submit: {
+                message: collectionMessage,
+              },
+            },
         metadata: {
           customer_name: customerName,
           customer_phone: customerPhone || '',

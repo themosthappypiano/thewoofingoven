@@ -197,10 +197,10 @@ export default function Checkout() {
                         />
                         <div>
                           <div className="font-semibold text-accent">Collection</div>
-                          <div className="text-sm text-accent/60">Collect from our kitchen - Free</div>
+                          <div className="text-sm text-accent/60">Collect your order - Free</div>
                           <div className="text-xs text-accent/50 mt-1">
-                            📍 The Woofing Oven, Dublin 2, Ireland<br/>
-                            🕒 Mon-Fri 9AM-6PM, Sat 10AM-4PM
+                            📍 Weekdays Mon to Sat at our kitchen in Rathcoole, Dublin 24<br/>
+                            📍 Sundays at People's Park, Dun Laoghaire
                           </div>
                         </div>
                       </label>
@@ -213,7 +213,7 @@ export default function Checkout() {
                         />
                         <div>
                           <div className="font-semibold text-accent">Delivery</div>
-                          <div className="text-sm text-accent/60">Dublin area delivery - €5-15 (based on distance)</div>
+                          <div className="text-sm text-accent/60">An Post 3-5 business days - €6.99</div>
                         </div>
                       </label>
                     </div>
@@ -284,7 +284,9 @@ export default function Checkout() {
                         <h4 className="font-bold text-accent text-sm leading-tight">{item.product.name}</h4>
                         <p className="text-accent/60 text-sm">Qty: {item.quantity}</p>
                       </div>
-                      <p className="font-bold text-primary">€{(Number(item.product.price) * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold text-primary">
+                        €{(Number(item.variant?.price ?? item.product.price) * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -299,13 +301,13 @@ export default function Checkout() {
                       {deliveryType === "delivery" ? "Delivery" : "Collection"}
                     </span>
                     <span>
-                      {deliveryType === "delivery" ? "€8.00" : "Free"}
+                      {deliveryType === "delivery" ? "€6.99" : "Free"}
                     </span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-accent pt-2 border-t border-border/50">
                     <span>Total</span>
                     <span className="text-primary">
-                      €{(getCartTotal() + (deliveryType === "delivery" ? 8 : 0)).toFixed(2)}
+                      €{(getCartTotal() + (deliveryType === "delivery" ? 6.99 : 0)).toFixed(2)}
                     </span>
                   </div>
                 </div>
