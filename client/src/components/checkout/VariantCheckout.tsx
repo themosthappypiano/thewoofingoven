@@ -31,7 +31,6 @@ export function VariantCheckout() {
 
   const collectionOnlyItems = getCollectionOnlyItems();
   const hasShippableItems = getShippingRequired();
-  const hasCakeItems = items.some((item) => item.product?.category === 'cake');
   const subtotal = getCartTotal();
 
   // Force collection if there are collection-only items
@@ -44,14 +43,13 @@ export function VariantCheckout() {
   // Calculate shipping when delivery details change
   useEffect(() => {
     if (formData.deliveryType === 'delivery') {
-      const hasDistance = !hasCakeItems || Number(formData.distanceKm) > 0;
-      if (formData.postalCode && formData.city && hasDistance) {
+      if (formData.postalCode && formData.city) {
         calculateShipping();
       }
     } else if (formData.deliveryType === 'collection') {
-      setShippingRate({ price: 0, name: 'Collection (Free)', delivery_time: 'Next day' });
+      setShippingRate({ price: 0, name: 'Collection', delivery_time: 'Arrange collection time' });
     }
-  }, [formData.deliveryType, formData.postalCode, formData.city, formData.distanceKm, hasCakeItems]);
+  }, [formData.deliveryType, formData.postalCode, formData.city]);
 
   const calculateShipping = async () => {
     try {
@@ -285,7 +283,11 @@ export function VariantCheckout() {
                       <MapPin className="w-5 h-5" />
                       <div>
                         <div className="font-medium">Collection</div>
-                        <div className="text-sm text-gray-600">Dublin 24 - Free</div>
+                        <div className="text-sm text-gray-600">Free</div>
+                        <div className="text-xs text-gray-500">
+                          Weekdays Mon to Sat at our kitchen in Rathcoole, Dublin 24.
+                          Sundays at People's Park, Dun Laoghaire.
+                        </div>
                       </div>
                     </div>
                   </Label>
@@ -311,7 +313,7 @@ export function VariantCheckout() {
                       <div>
                         <div className="font-medium">Delivery</div>
                         <div className="text-sm text-gray-600">
-                          {collectionOnlyItems.length > 0 ? 'Not available' : 'Dublin only • €0.85/km (cakes)'}
+                          {collectionOnlyItems.length > 0 ? 'Not available' : 'An Post 3-5 business days • €6.99'}
                         </div>
                       </div>
                     </div>
@@ -353,23 +355,6 @@ export function VariantCheckout() {
                           required
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="distanceKm">Delivery Distance (km) {hasCakeItems ? '*' : ''}</Label>
-                      <Input
-                        id="distanceKm"
-                        name="distanceKm"
-                        type="number"
-                        min="1"
-                        step="0.1"
-                        value={formData.distanceKm}
-                        onChange={handleInputChange}
-                        required={hasCakeItems}
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Used to calculate cake delivery at €0.85/km (Dublin only).
-                      </p>
                     </div>
                   </div>
                 )}

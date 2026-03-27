@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useLocation } from "wouter";
 import { CheckCircle2, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -38,13 +39,15 @@ const checkoutSchema = z.object({
   path: ["shippingAddress"]
 });
 
+type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
 export default function Checkout() {
   const { items, getCartTotal, clearCart } = useCart();
   const checkoutMutation = useCheckout();
   const [isSuccess, setIsSuccess] = useState(false);
   const [, setLocation] = useLocation();
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       deliveryType: "collection" as const,
@@ -55,7 +58,43 @@ export default function Checkout() {
   });
 
   const deliveryType = watch("deliveryType");
-  const needsShipping = deliveryType === "delivery";
+  const collectionOnlyItems = useMemo(
+    () => items.filter((item) => isCollectionOnlyCartItem(item)),
+    [items]
+  );
+  const hasCollectionOnlyItems = collectionOnlyItems.length > 0;
+  const hasDeliverableItems = items.some((item) => !isCollectionOnlyCartItem(item));
+  const isDeliveryUnavailable = hasCollectionOnlyItems && !hasDeliverableItems;
+  const effectiveDeliveryType = isDeliveryUnavailable ? "collection" : deliveryType;
+  const needsShipping = effectiveDeliveryType === "delivery";
+
+  const isPlaceholderImageUrl = (url?: string) => {
+    if (!url) return true;
+    const normalized = String(url).toLowerCase();
+    return normalized.includes("placehold.co") || normalized.includes("placeholder");
+  };
+
+  const getCheckoutItemImage = (item: typeof items[number]) => {
+    const curatedByProductName: Record<string, string> = {
+      Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+      Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
+    };
+
+    const candidateImages = [item.variant?.imageUrl, item.product?.imageUrl];
+    const firstValidImage = candidateImages.find((url) => !isPlaceholderImageUrl(url));
+
+    return (
+      firstValidImage ||
+      curatedByProductName[item.product.name] ||
+      "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=100&q=80"
+    );
+  };
+
+  useEffect(() => {
+    if (isDeliveryUnavailable && deliveryType === "delivery") {
+      setValue("deliveryType", "collection", { shouldValidate: true, shouldDirty: true });
+    }
+  }, [isDeliveryUnavailable, deliveryType, setValue]);
 
   const onSubmit = (data: any) => {
     console.log('=== FORM SUBMISSION START ===');
@@ -66,6 +105,8 @@ export default function Checkout() {
     try {
       const payload = {
         ...data,
+        deliveryType: effectiveDeliveryType,
+        shippingAddress: effectiveDeliveryType === "delivery" ? data.shippingAddress : undefined,
         items: items.map(i => ({
           productVariantId: Number(i.variant.id),
           quantity: i.quantity,
@@ -76,10 +117,11 @@ export default function Checkout() {
             name: i.variant.name,
             price: i.variant.price,
             imageUrl: i.variant.imageUrl || '',
-            shippingRequired: i.variant.shippingRequired ?? true
+            shippingRequired: isCollectionOnlyCartItem(i) ? false : (i.variant.shippingRequired ?? true)
           },
           productName: i.product.name,
-          productId: i.product.id
+          productId: i.product.id,
+          productCategory: i.product.category
         }))
       };
 
@@ -131,9 +173,9 @@ export default function Checkout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-32 pb-24">
+      <main className="flex-1 pt-36 sm:pt-40 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link href="/shop" className="inline-flex items-center text-accent/60 hover:text-primary mb-8 font-medium transition-colors">
+          <Link href="/shop" className="inline-flex items-center text-accent/60 hover:text-primary mt-2 mb-8 font-medium transition-colors">
             <ChevronLeft size={20} />
             Back to Shop
           </Link>
@@ -187,6 +229,13 @@ export default function Checkout() {
 
                   <div>
                     <label className="block text-sm font-bold text-accent mb-4">Delivery Option</label>
+                    {hasCollectionOnlyItems && (
+                      <div className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        {hasDeliverableItems
+                          ? `${collectionOnlyItems.map((item) => item.product.name).filter((value, index, list) => list.indexOf(value) === index).join(", ")} are collection only due to freshness and must be collected. Delivery applies only to the other items in your basket.`
+                          : `${collectionOnlyItems.map((item) => item.product.name).filter((value, index, list) => list.indexOf(value) === index).join(", ")} are collection only, so delivery is not available for this order.`}
+                      </div>
+                    )}
                     <div className="space-y-3">
                       <label className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-primary/50 cursor-pointer transition-colors">
                         <input 
@@ -204,11 +253,16 @@ export default function Checkout() {
                           </div>
                         </div>
                       </label>
-                      <label className="flex items-center gap-3 p-4 rounded-xl border border-border hover:border-primary/50 cursor-pointer transition-colors">
+                      <label className={`flex items-center gap-3 p-4 rounded-xl border transition-colors ${
+                        isDeliveryUnavailable
+                          ? "border-border bg-muted/40 opacity-60 cursor-not-allowed"
+                          : "border-border hover:border-primary/50 cursor-pointer"
+                      }`}>
                         <input 
                           {...register("deliveryType")}
                           type="radio" 
                           value="delivery"
+                          disabled={isDeliveryUnavailable}
                           className="text-primary focus:ring-primary/20"
                         />
                         <div>
@@ -276,7 +330,7 @@ export default function Checkout() {
                   {items.map(item => (
                     <div key={item.product.id} className="flex gap-4">
                       <img 
-                        src={item.product.imageUrl || "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=100&q=80"} 
+                        src={getCheckoutItemImage(item)}
                         alt={item.product.name}
                         className="w-16 h-16 rounded-xl object-cover"
                       />
@@ -298,16 +352,16 @@ export default function Checkout() {
                   </div>
                   <div className="flex justify-between text-accent/80">
                     <span>
-                      {deliveryType === "delivery" ? "Delivery" : "Collection"}
+                      {effectiveDeliveryType === "delivery" ? "Delivery" : "Collection"}
                     </span>
                     <span>
-                      {deliveryType === "delivery" ? "€6.99" : "Free"}
+                      {effectiveDeliveryType === "delivery" ? "€6.99" : "Free"}
                     </span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-accent pt-2 border-t border-border/50">
                     <span>Total</span>
                     <span className="text-primary">
-                      €{(getCartTotal() + (deliveryType === "delivery" ? 6.99 : 0)).toFixed(2)}
+                      €{(getCartTotal() + (effectiveDeliveryType === "delivery" ? 6.99 : 0)).toFixed(2)}
                     </span>
                   </div>
                 </div>

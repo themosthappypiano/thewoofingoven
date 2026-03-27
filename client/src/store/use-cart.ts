@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isCollectionOnlyCartItem } from '@shared/delivery-rules';
 
 function playAddToCartSound() {
   if (typeof window === "undefined") return;
@@ -147,11 +148,11 @@ export const useCart = create<CartStore>()(
       },
       getShippingRequired: () => {
         const { items } = get();
-        return items.some(item => item.variant && item.variant.shippingRequired);
+        return items.some(item => !isCollectionOnlyCartItem(item));
       },
       getCollectionOnlyItems: () => {
         const { items } = get();
-        return items.filter(item => item.variant && !item.variant.shippingRequired);
+        return items.filter((item) => isCollectionOnlyCartItem(item));
       },
       openDrawer: () => set({ isDrawerOpen: true }),
       closeDrawer: () => set({ isDrawerOpen: false }),

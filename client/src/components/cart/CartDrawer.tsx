@@ -1,6 +1,7 @@
 import { useCart } from "@/store/use-cart";
 import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Link } from "wouter";
+import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -9,6 +10,36 @@ interface CartDrawerProps {
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, getCartTotal } = useCart();
+  const collectionOnlyNames = Array.from(
+    new Set(
+      items
+        .filter((item) => isCollectionOnlyCartItem(item))
+        .map((item) => item.product.name)
+    )
+  );
+  const hasCollectionOnlyItems = collectionOnlyNames.length > 0;
+
+  const isPlaceholderImageUrl = (url?: string) => {
+    if (!url) return true;
+    const normalized = String(url).toLowerCase();
+    return normalized.includes("placehold.co") || normalized.includes("placeholder");
+  };
+
+  const getCartItemImage = (item: typeof items[number]) => {
+    const curatedByProductName: Record<string, string> = {
+      Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+      Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
+    };
+
+    const candidateImages = [item.variant.imageUrl, item.product.imageUrl];
+    const firstValidImage = candidateImages.find((url) => !isPlaceholderImageUrl(url));
+
+    return (
+      firstValidImage ||
+      curatedByProductName[item.product.name] ||
+      "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=150&h=150&fit=crop"
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -53,7 +84,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             items.map((item) => (
               <div key={`${item.variant.id}-${JSON.stringify(item.customization)}`} className="flex gap-4 p-4 bg-secondary/50 rounded-2xl">
                 <img 
-                  src={item.variant.imageUrl || item.product.imageUrl || "https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=150&h=150&fit=crop"} 
+                  src={getCartItemImage(item)}
                   alt={item.product.name}
                   className="w-20 h-20 object-cover rounded-xl"
                 />
@@ -96,6 +127,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Footer */}
         {items.length > 0 && (
           <div className="p-6 bg-white border-t border-border space-y-4">
+            {hasCollectionOnlyItems && (
+              <p className="text-sm rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-amber-800">
+                {collectionOnlyNames.join(", ")} must be collected. Delivery is not available for this cart.
+              </p>
+            )}
             <div className="flex items-center justify-between text-lg font-bold text-accent">
               <span>Subtotal</span>
               <span>€{getCartTotal().toFixed(2)}</span>

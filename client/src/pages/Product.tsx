@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { useProduct } from "@/hooks/use-api";
 import { useCart } from "@/store/use-cart";
 import { ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
+import { isCollectionOnlyProduct } from "@shared/delivery-rules";
+import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 type Variant = {
   id: string | number;
@@ -28,6 +30,7 @@ export default function ProductPage() {
   const productId = params?.id ? decodeURIComponent(params.id) : "";
   const { data: product, isLoading } = useProduct(productId);
   const addItem = useCart((state) => state.addItem);
+  const { requestCollectionOnlyConfirm, dialog: collectionOnlyDialog } = useCollectionOnlyConfirm();
   const [selectedImage, setSelectedImage] = useState(0);
   const [imageOpacity, setImageOpacity] = useState(1);
   const [selectedDesign, setSelectedDesign] = useState<string>("");
@@ -43,6 +46,10 @@ export default function ProductPage() {
   const [isBenefitsOpen, setIsBenefitsOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [productId]);
+
   const variants: Variant[] = product?.variants || [];
   const isCake = product?.category === 'cake';
   const isPupcakes = product?.name === 'Pupcakes';
@@ -50,6 +57,7 @@ export default function ProductPage() {
   const isWoofles = product?.name === 'Woofles';
   const isDognuts = product?.name === 'Dognuts';
   const isBarkdayBox = product?.name === 'Barkday Box';
+  const isCollectionOnly = isCollectionOnlyProduct(product);
   const useCakeSelectors = isCake && !isPupcakes;
   const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign || selectedDesign === "Deluxe/Bespoke";
   const parsedVariants: ParsedVariant[] = useMemo(
@@ -460,11 +468,6 @@ export default function ProductPage() {
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-4xl font-display font-bold text-accent">{product.name}</h1>
-                  {isPupcakes && (
-                    <span className="text-sm font-semibold uppercase tracking-wide text-red-600">
-                      Collection only
-                    </span>
-                  )}
                 </div>
                 <p className="text-3xl font-bold text-primary mt-1">
                   {isDeluxe ? "From 80 euros" : 
@@ -739,13 +742,19 @@ export default function ProductPage() {
                         name: selectedVariant.name,
                         price: selectedVariant.price,
                         imageUrl: selectedVariant.imageUrl || product.imageUrl,
-                        shippingRequired: selectedVariant.shippingRequired ?? true,
+                        shippingRequired: isCollectionOnly ? false : (selectedVariant.shippingRequired ?? true),
                       }
                     : undefined;
                   const customization =
                     isCake && selectedCakeFlavor
                       ? { flavor: selectedCakeFlavor }
                       : undefined;
+                  if (isCollectionOnly) {
+                    requestCollectionOnlyConfirm(product.name, () => {
+                      addItem(product, cartVariant, 1, customization);
+                    });
+                    return;
+                  }
                   addItem(product, cartVariant, 1, customization);
                 }}
                 disabled={isDeluxe || isBoneShaped}
@@ -784,6 +793,8 @@ export default function ProductPage() {
           </div>
         </div>
       )}
+
+      {collectionOnlyDialog}
 
       {isTrainingTreats && isBenefitsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

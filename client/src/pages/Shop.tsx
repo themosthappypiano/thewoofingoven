@@ -6,10 +6,13 @@ import { useCart } from "@/store/use-cart";
 import { ShoppingBag } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useEffect } from "react";
+import { isCollectionOnlyProduct } from "@shared/delivery-rules";
+import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 export default function Shop() {
   const { data: products, isLoading } = useProducts();
   const addItem = useCart((state) => state.addItem);
+  const { requestCollectionOnlyConfirm, dialog: collectionOnlyDialog } = useCollectionOnlyConfirm();
   const [location] = useLocation();
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export default function Shop() {
     { id: 3, name: "Training Treats", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
     { id: 4, name: "Pupcakes", price: "7.20", category: "cake", imageUrl: "https://placehold.co/500x500?text=Pupcakes", variants: [{ id: "fallback-pup-2", name: "Box of 2", price: "7.20", shippingRequired: false }] },
     { id: 5, name: "Dognuts", price: "19.80", category: "treat", imageUrl: "https://placehold.co/500x500?text=Dognuts", variants: [{ id: "fallback-dognut-6", name: "Box of 6", price: "19.80", shippingRequired: false }] },
-    { id: 6, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
+    { id: 6, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: false }] },
   ];
 
   return (
@@ -116,6 +119,14 @@ export default function Shop() {
                   product.name === "Woofles"
                     ? wooflesDefaultVariant || product.variants?.[0]
                     : product.variants?.[0];
+                const quickAddVariant = defaultCartVariant
+                  ? {
+                      ...defaultCartVariant,
+                      shippingRequired: isCollectionOnlyProduct(product)
+                        ? false
+                        : (defaultCartVariant.shippingRequired ?? true),
+                    }
+                  : undefined;
                 return (
                 <div
                   key={product.id}
@@ -150,7 +161,13 @@ export default function Shop() {
                   <div className="flex gap-2">
                     <Button 
                       className="flex-1 gap-2" 
-                      onClick={() => addItem(product, defaultCartVariant)}
+                      onClick={() => {
+                        if (isCollectionOnlyProduct(product)) {
+                          requestCollectionOnlyConfirm(product.name, () => addItem(product, quickAddVariant));
+                          return;
+                        }
+                        addItem(product, quickAddVariant);
+                      }}
                     >
                       <ShoppingBag size={18} />
                       Add to Cart
@@ -169,6 +186,7 @@ export default function Shop() {
         </div>
       </main>
       <Footer />
+      {collectionOnlyDialog}
     </div>
   );
 }

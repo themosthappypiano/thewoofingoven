@@ -6,6 +6,7 @@ import { z } from "zod";
 import { stripe, calculateShipping, SHIPPING_RATES } from "./stripe";
 import { db as dbPromise } from "./db";
 import { products, productVariants } from "@shared/schema";
+import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
 import { eq } from "drizzle-orm";
 
 async function seedDatabase() {
@@ -423,6 +424,8 @@ export async function registerRoutes(
           }
         }
 
+        const collectionOnlyItem = isCollectionOnlyCartItem(item);
+
         if (!variantData) {
           if (!item.variantData) {
             return res.status(400).json({ message: `Variant ${variantId} not found` });
@@ -434,7 +437,7 @@ export async function registerRoutes(
             name: item.variantData.name || item.productName || 'Product',
             price: item.variantData.price || item.price || 0,
             imageUrl: item.variantData.imageUrl || item.imageUrl || '',
-            shippingRequired: item.variantData.shippingRequired ?? true,
+            shippingRequired: collectionOnlyItem ? false : (item.variantData.shippingRequired ?? true),
           };
         }
 
@@ -452,7 +455,7 @@ export async function registerRoutes(
               metadata: {
                 variant_id: String(variantData.id),
                 product_id: String(variantData.productId || ''),
-                shipping_required: String(variantData.shippingRequired ?? true),
+                shipping_required: String(collectionOnlyItem ? false : (variantData.shippingRequired ?? true)),
               }
             },
             unit_amount: Math.round(Number(variantData.price) * 100), // Convert to cents

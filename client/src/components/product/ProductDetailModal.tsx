@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { X, ShoppingBag, Heart } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/store/use-cart";
+import { isCollectionOnlyProduct } from "@shared/delivery-rules";
+import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 interface Product {
   id: number | string;
@@ -39,8 +41,10 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string | number | null>(null);
   const addItem = useCart((state) => state.addItem);
+  const { requestCollectionOnlyConfirm, dialog: collectionOnlyDialog } = useCollectionOnlyConfirm();
   const variants = product?.variants || [];
   const selectedVariant = variants.find((variant) => variant.id === selectedVariantId) || variants[0] || null;
+  const isCollectionOnly = isCollectionOnlyProduct(product);
 
   useEffect(() => {
     if (variants.length > 0 && selectedVariantId === null) {
@@ -240,9 +244,16 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                           name: selectedVariant.name,
                           price: selectedVariant.price,
                           imageUrl: selectedVariant.imageUrl || product.imageUrl,
-                          shippingRequired: selectedVariant.shippingRequired ?? true,
+                          shippingRequired: isCollectionOnly ? false : (selectedVariant.shippingRequired ?? true),
                         }
                       : undefined;
+                    if (isCollectionOnly) {
+                      requestCollectionOnlyConfirm(product.name, () => {
+                        addItem(product, cartVariant);
+                        onClose();
+                      });
+                      return;
+                    }
                     addItem(product, cartVariant);
                     onClose();
                   }}
@@ -258,6 +269,8 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
           </div>
         </div>
       </div>
+
+      {collectionOnlyDialog}
     </div>
   );
 }

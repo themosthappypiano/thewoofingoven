@@ -74,26 +74,26 @@ export default function FAQ() {
           <div className="flex flex-col lg:flex-row gap-10">
             
             {/* FAQ Section */}
-            <div className="flex-[2] bg-[#FFF8EF] p-8 rounded-3xl border-4 border-[#FFB7D5] shadow-soft">
-              <h1 className="text-4xl md:text-5xl font-display font-bold text-[#FF6B9D] mb-8 relative pl-12">
+            <div className="flex-[2] rounded-3xl border-4 border-primary/60 bg-secondary/80 p-8 shadow-soft">
+              <h1 className="relative mb-8 pl-12 text-4xl font-display font-bold text-accent md:text-5xl">
                 ⭐ The Woofing Oven – FAQ
-                <span className="absolute left-0 top-0 text-4xl">🐾</span>
+                <span className="absolute left-0 top-0 text-4xl text-primary">🐾</span>
               </h1>
 
               {faqData.map((item, index) => (
                 <div 
                   key={item.id} 
-                  className="mb-4 rounded-2xl overflow-hidden border-2 border-[#FFB7D5] bg-white"
+                  className="mb-4 overflow-hidden rounded-2xl border-2 border-primary/40 bg-white"
                 >
                   <button
                     onClick={() => toggleItem(item.id)}
-                    className="w-full bg-[#FFE3EF] hover:bg-[#FFD4E7] px-6 py-4 text-left flex justify-between items-center transition-colors duration-200"
+                    className="flex w-full items-center justify-between bg-primary/20 px-6 py-4 text-left transition-colors duration-200 hover:bg-primary/30"
                   >
-                    <span className="text-lg font-bold text-[#E65182]">
+                    <span className="text-lg font-bold text-accent">
                       {index + 1}. {item.question}
                     </span>
                     <span 
-                      className={`text-[#E65182] transition-transform duration-300 ${
+                      className={`text-carrot-chickpea transition-transform duration-300 ${
                         openItems.includes(item.id) ? 'rotate-90' : ''
                       }`}
                     >
@@ -118,7 +118,7 @@ export default function FAQ() {
                 <img 
                   src="https://i.ibb.co/mVX2KjK2/Whats-App-Image-2025-10-15-at-21-35-34-2.jpg"
                   alt="The Woofing Oven treats"
-                  className="w-4/5 mx-auto rounded-3xl border-4 border-[#FFB7D5] shadow-soft"
+                  className="mx-auto w-4/5 rounded-3xl border-4 border-primary/60 shadow-soft"
                 />
               </div>
             </div>
@@ -128,17 +128,17 @@ export default function FAQ() {
               <img 
                 src="https://i.ibb.co/tMb2zSD0/Whats-App-Image-2025-10-15-at-21-35-34-10.jpg"
                 alt="Woofing Oven gallery 1"
-                className="w-full rounded-3xl border-4 border-[#FFB7D5] object-cover shadow-soft"
+                className="w-full rounded-3xl border-4 border-primary/60 object-cover shadow-soft"
               />
               <img 
                 src="https://i.ibb.co/7JWbBKtX/Whats-App-Image-2025-10-15-at-22-00-56.jpg"
                 alt="Woofing Oven gallery 2"
-                className="w-full rounded-3xl border-4 border-[#FFB7D5] object-cover shadow-soft"
+                className="w-full rounded-3xl border-4 border-primary/60 object-cover shadow-soft"
               />
               <img 
                 src="https://i.ibb.co/hRTxbyzd/Whats-App-Image-2025-10-15-at-22-00-56-1.jpg"
                 alt="Woofing Oven gallery 3"
-                className="w-full rounded-3xl border-4 border-[#FFB7D5] object-cover shadow-soft"
+                className="w-full rounded-3xl border-4 border-primary/60 object-cover shadow-soft"
               />
             </div>
 

@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { isCollectionOnlyCartItem } from '../shared/delivery-rules';
 
 // Initialize Stripe with secret key or use dummy for development
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development';
@@ -7,97 +8,45 @@ export const stripe = new Stripe(stripeSecretKey, {
   apiVersion: '2023-10-16',
 });
 
-// Shipping rates for Dublin area
-export const CAKE_DELIVERY_RATE_CENTS_PER_KM = 85;
-
 export const SHIPPING_RATES = {
   collection: {
     id: 'collection',
-    name: 'Collection (Dublin 24)',
+    name: 'Collection',
     price: 0,
-    delivery_time: 'Next day',
+    delivery_time: 'Arrange collection time',
   },
-  cake_delivery: {
-    id: 'cake_delivery',
-    name: 'Cake Delivery (Dublin)',
-    price: CAKE_DELIVERY_RATE_CENTS_PER_KM,
-    delivery_time: '1-2 business days',
+  an_post: {
+    id: 'an_post',
+    name: 'An Post Shipping',
+    price: 699,
+    delivery_time: '3-5 business days',
   },
 };
 
 // Helper to calculate shipping based on location and products
 export function calculateShipping(
   deliveryType: 'delivery' | 'collection',
-  location?: { postalCode?: string; city?: string; distanceKm?: number },
+  _location?: { postalCode?: string; city?: string; distanceKm?: number },
   cartItems?: any[]
 ) {
   if (deliveryType === 'collection') {
     return SHIPPING_RATES.collection;
   }
 
-  // Check if any items require collection only
-  const hasCollectionOnlyItems = cartItems?.some(item => {
-    if (typeof item?.shippingRequired === 'boolean') return !item.shippingRequired;
-    if (typeof item?.variant?.shippingRequired === 'boolean') return !item.variant.shippingRequired;
-    if (typeof item?.variantData?.shippingRequired === 'boolean') return !item.variantData.shippingRequired;
-    return false;
-  });
+  const hasItems = Array.isArray(cartItems) && cartItems.length > 0;
+  const hasShippableItems = hasItems
+    ? cartItems.some((item) => !isCollectionOnlyCartItem(item))
+    : true;
 
-  if (hasCollectionOnlyItems) {
-    throw new Error('Some items in your cart are collection only.');
+  // Delivery is only invalid when the full cart is collection-only.
+  if (!hasShippableItems) {
+    throw new Error('All items in your cart are collection only, so delivery is unavailable.');
   }
-
-  const isBarkdayBoxDelivery = (item: any) => {
-    const productName = item?.product?.name || item?.productName || '';
-    const variantName = item?.variant?.name || item?.variantData?.name || '';
-    return productName === 'Barkday Box' && variantName.toLowerCase().includes('delivery');
-  };
-
-  const isCakeItem = (item: any) => {
-    const category = item?.product?.category || item?.productCategory || '';
-    const productName = item?.product?.name || item?.productName || '';
-    return category === 'cake' || productName.toLowerCase().includes('cake');
-  };
-
-  const items = cartItems || [];
-  const onlyDeliveryIncluded =
-    items.length > 0 && items.every((item) => isBarkdayBoxDelivery(item));
-
-  if (onlyDeliveryIncluded) {
-    return {
-      id: 'delivery_included',
-      name: 'Delivery Included (Barkday Box)',
-      price: 0,
-      delivery_time: '1-2 business days',
-    };
-  }
-
-  const hasNonCakeDeliveryItems = items.some(
-    (item) => !isCakeItem(item) && !isBarkdayBoxDelivery(item)
-  );
-  if (hasNonCakeDeliveryItems) {
-    throw new Error('Only cakes (and Barkday Box delivery) are eligible for delivery.');
-  }
-
-  const isDublin =
-    location?.postalCode?.startsWith('D') ||
-    location?.city?.toLowerCase().includes('dublin');
-
-  if (!isDublin) {
-    throw new Error('Cake delivery is available for Dublin addresses only.');
-  }
-
-  const distanceKm = Number(location?.distanceKm);
-  if (!Number.isFinite(distanceKm) || distanceKm <= 0) {
-    throw new Error('Please provide the delivery distance in kilometers for cake delivery.');
-  }
-
-  const deliveryPrice = Math.round(distanceKm * CAKE_DELIVERY_RATE_CENTS_PER_KM);
   return {
-    id: SHIPPING_RATES.cake_delivery.id,
-    name: `Cake Delivery (${distanceKm} km)`,
-    price: deliveryPrice,
-    delivery_time: SHIPPING_RATES.cake_delivery.delivery_time,
+    id: SHIPPING_RATES.an_post.id,
+    name: SHIPPING_RATES.an_post.name,
+    price: SHIPPING_RATES.an_post.price,
+    delivery_time: SHIPPING_RATES.an_post.delivery_time,
   };
 }
 
