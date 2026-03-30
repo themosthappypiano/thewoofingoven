@@ -16,27 +16,7 @@ const checkoutSchema = z.object({
   customerEmail: z.string().email("Valid email required"),
   customerPhone: z.string().optional(),
   deliveryType: z.enum(["collection", "delivery"]),
-  shippingAddress: z.object({
-    address: z.string().optional(),
-    city: z.string().optional(),
-    postalCode: z.string().optional(),
-    country: z.string().default("Ireland"),
-  }).optional(),
   specialInstructions: z.string().optional(),
-}).refine((data) => {
-  if (data.deliveryType === "delivery") {
-    return data.shippingAddress && 
-           data.shippingAddress.address && 
-           data.shippingAddress.address.length > 0 && 
-           data.shippingAddress.city && 
-           data.shippingAddress.city.length > 0 && 
-           data.shippingAddress.postalCode && 
-           data.shippingAddress.postalCode.length > 0;
-  }
-  return true;
-}, {
-  message: "Complete address is required for delivery",
-  path: ["shippingAddress"]
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -51,9 +31,6 @@ export default function Checkout() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       deliveryType: "collection" as const,
-      shippingAddress: {
-        country: "Ireland"
-      }
     }
   });
 
@@ -66,7 +43,6 @@ export default function Checkout() {
   const hasDeliverableItems = items.some((item) => !isCollectionOnlyCartItem(item));
   const isDeliveryUnavailable = hasCollectionOnlyItems && !hasDeliverableItems;
   const effectiveDeliveryType = isDeliveryUnavailable ? "collection" : deliveryType;
-  const needsShipping = effectiveDeliveryType === "delivery";
 
   const isPlaceholderImageUrl = (url?: string) => {
     if (!url) return true;
@@ -106,7 +82,7 @@ export default function Checkout() {
       const payload = {
         ...data,
         deliveryType: effectiveDeliveryType,
-        shippingAddress: effectiveDeliveryType === "delivery" ? data.shippingAddress : undefined,
+        shippingAddress: undefined,
         items: items.map(i => ({
           productVariantId: Number(i.variant.id),
           quantity: i.quantity,
@@ -273,41 +249,6 @@ export default function Checkout() {
                     </div>
                     {errors.deliveryType && <p className="text-destructive text-sm mt-1">{errors.deliveryType.message as string}</p>}
                   </div>
-
-                  {needsShipping && (
-                    <div className="space-y-4 p-4 bg-background/50 rounded-xl border border-border/50">
-                      <h3 className="font-semibold text-accent">Delivery Address</h3>
-                      <div>
-                        <label className="block text-sm font-bold text-accent mb-2">Street Address</label>
-                        <input 
-                          {...register("shippingAddress.address")}
-                          className="w-full px-4 py-3 rounded-xl bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                          placeholder="123 Main Street"
-                        />
-                        {errors.shippingAddress?.address && <p className="text-destructive text-sm mt-1">{errors.shippingAddress.address.message as string}</p>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-bold text-accent mb-2">City</label>
-                          <input 
-                            {...register("shippingAddress.city")}
-                            className="w-full px-4 py-3 rounded-xl bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            placeholder="Dublin"
-                          />
-                          {errors.shippingAddress?.city && <p className="text-destructive text-sm mt-1">{errors.shippingAddress.city.message as string}</p>}
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-accent mb-2">Postal Code</label>
-                          <input 
-                            {...register("shippingAddress.postalCode")}
-                            className="w-full px-4 py-3 rounded-xl bg-white border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                            placeholder="D01 A1B2"
-                          />
-                          {errors.shippingAddress?.postalCode && <p className="text-destructive text-sm mt-1">{errors.shippingAddress.postalCode.message as string}</p>}
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   <div>
                     <label className="block text-sm font-bold text-accent mb-2">Special Instructions (Optional)</label>
