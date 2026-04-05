@@ -511,6 +511,7 @@ export async function registerRoutes(
       const collectionMessage =
         "Collection: Monday to Saturday at our kitchen in Rathcoole, Dublin 24. Sundays at People's Park, Dun Laoghaire.";
       const deliveryMessage = "Shipping via An Post. Delivery in 3-5 business days for EUR 6.99.";
+      const fulfillmentLabel = deliveryType === 'delivery' ? 'Delivery' : 'Collection';
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -547,7 +548,16 @@ export async function registerRoutes(
           customer_phone: customerPhone || '',
           delivery_type: deliveryType,
           special_instructions: specialInstructions || '',
-        }
+        },
+        payment_intent_data: {
+          description: `Fulfillment: ${fulfillmentLabel}`,
+          metadata: {
+            delivery_type: deliveryType,
+            fulfillment_method: fulfillmentLabel.toLowerCase(),
+            customer_name: customerName,
+            customer_phone: customerPhone || '',
+          },
+        },
       });
 
       res.json({
