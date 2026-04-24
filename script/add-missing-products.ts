@@ -87,7 +87,7 @@ async function upsertVariant(productId: number, variant: ProductSeed['variants']
       : null,
     imageUrl: variant.imageUrl ?? null,
     stripePriceId: null,
-    shippingRequired: variant.shippingRequired ?? false,
+    shippingRequired: variant.shippingRequired ?? true,
     weight: isLocal ? (variant.weight ?? null) : (variant.weight ? Number(variant.weight) : null),
     createdAt: isLocal ? nowIso : nowDate,
   };

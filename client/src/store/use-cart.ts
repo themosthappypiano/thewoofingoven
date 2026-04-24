@@ -53,6 +53,9 @@ export interface CartVariant {
   price: string | number;
   imageUrl?: string;
   shippingRequired?: boolean;
+  option1?: { name: string; value: string };
+  option2?: { name: string; value: string };
+  option3?: { name: string; value: string };
 }
 
 interface CartStore {
@@ -158,7 +161,7 @@ export const useCart = create<CartStore>()(
       closeDrawer: () => set({ isDrawerOpen: false }),
     }),
     {
-      name: 'woofing-oven-cart-v4', // Changed name to reset old cart data and add drawer state
+      name: 'woofing-oven-cart-v5', // Reset persisted carts after delivery flag fixes
       partialize: (state) => ({ items: state.items }), // Don't persist drawer state
     }
   )

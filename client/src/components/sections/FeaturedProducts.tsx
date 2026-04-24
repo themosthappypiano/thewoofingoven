@@ -11,8 +11,8 @@ export function FeaturedProducts() {
   // Mock data fallback if backend fails/empty during development
   const displayProducts = products?.length ? products.slice(0, 4) : [
     { id: 1, name: "Barkday Box", price: "30.00", category: "box", imageUrl: "https://i.ibb.co/0gpzNsx/image.png", variants: [{ id: "fallback-box-collect", name: "Collection", price: "30.00", shippingRequired: false }] },
-    { id: 2, name: "Woofles", price: "40.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-4", name: "4 Packs", price: "40.00", shippingRequired: false }] },
-    { id: 3, name: "Training Treats", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.00", shippingRequired: false }] },
+    { id: 2, name: "Woofles", price: "40.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-4", name: "4 Packs", price: "40.00", shippingRequired: true }] },
+    { id: 3, name: "Training Treats", price: "7.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.00", shippingRequired: true }] },
     { id: 4, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
   ] as any[];
 
