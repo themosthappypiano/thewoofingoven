@@ -94,6 +94,9 @@ export function VariantCheckout() {
           price: item.variant.price,
           imageUrl: item.variant.imageUrl || item.product.imageUrl,
           shippingRequired: item.variant.shippingRequired ?? true,
+          option1: item.variant.option1,
+          option2: item.variant.option2,
+          option3: item.variant.option3,
         } : undefined,
         quantity: item.quantity,
         customization: item.customization,
@@ -210,8 +213,7 @@ export function VariantCheckout() {
                   <div>
                     <p className="font-medium text-amber-800">Collection Required</p>
                     <p className="text-sm text-amber-700">
-                      Your cart contains items that require collection from our Dublin 24 location 
-                      (most treats are collection only; delivery is for cakes and Barkday Box delivery only).
+                      Your cart contains items that require collection from our Dublin 24 location.
                     </p>
                   </div>
                 </div>

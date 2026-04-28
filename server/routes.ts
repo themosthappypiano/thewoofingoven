@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import type { Server } from "http";
+import type Stripe from "stripe";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
@@ -90,6 +91,9 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL || "";
+
   const newsletterInputSchema = z.object({
     email: z.string().email(),
   });
@@ -391,6 +395,112 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/stripe/webhook", async (req, res) => {
+    if (!stripeWebhookSecret) {
+      console.error("[stripe webhook] missing STRIPE_WEBHOOK_SECRET");
+      return res.status(500).send("Webhook secret is not configured.");
+    }
+
+    if (!n8nWebhookUrl) {
+      console.error("[stripe webhook] missing N8N_WEBHOOK_URL");
+      return res.status(500).send("n8n webhook URL is not configured.");
+    }
+
+    const signature = req.headers["stripe-signature"];
+    const rawBody = Buffer.isBuffer(req.rawBody) ? req.rawBody : null;
+
+    if (!signature || Array.isArray(signature)) {
+      return res.status(400).send("Missing Stripe signature.");
+    }
+
+    if (!rawBody) {
+      return res.status(400).send("Missing raw request body.");
+    }
+
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, signature, stripeWebhookSecret);
+    } catch (error: any) {
+      console.error("[stripe webhook] signature verification failed", error?.message || error);
+      return res.status(400).send(`Webhook Error: ${error?.message || "Invalid signature"}`);
+    }
+
+    if (event.type !== "payment_intent.succeeded") {
+      return res.json({ received: true, ignored: event.type });
+    }
+
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const latestCharge =
+      paymentIntent.latest_charge && typeof paymentIntent.latest_charge !== "string"
+        ? paymentIntent.latest_charge
+        : null;
+
+    const customerEmail =
+      paymentIntent.receipt_email ||
+      paymentIntent.metadata.customer_email ||
+      latestCharge?.billing_details?.email ||
+      null;
+
+    let shippingAddress: Record<string, unknown> | null = null;
+    let orderItems: Array<Record<string, unknown>> = [];
+
+    try {
+      shippingAddress = paymentIntent.metadata.shipping_address
+        ? JSON.parse(paymentIntent.metadata.shipping_address)
+        : null;
+    } catch (error) {
+      console.error("[stripe webhook] failed to parse shipping address metadata", error);
+    }
+
+    try {
+      orderItems = paymentIntent.metadata.order_items
+        ? JSON.parse(paymentIntent.metadata.order_items)
+        : [];
+    } catch (error) {
+      console.error("[stripe webhook] failed to parse order items metadata", error);
+    }
+
+    const payload = {
+      customerName: paymentIntent.metadata.customer_name || null,
+      customerEmail,
+      customerPhone: paymentIntent.metadata.customer_phone || null,
+      amountPaid: paymentIntent.amount_received,
+      currency: paymentIntent.currency,
+      paymentIntentId: paymentIntent.id,
+      paymentStatus: paymentIntent.status,
+      deliveryType: paymentIntent.metadata.delivery_type || null,
+      specialInstructions: paymentIntent.metadata.special_instructions || null,
+      shippingAmount: Number(paymentIntent.metadata.shipping_amount || 0),
+      shippingAddress,
+      orderItems,
+    };
+
+    try {
+      const forwardResponse = await fetch(n8nWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!forwardResponse.ok) {
+        const responseText = await forwardResponse.text();
+        console.error("[stripe webhook] n8n forward failed", {
+          status: forwardResponse.status,
+          body: responseText,
+        });
+        return res.status(502).send("Failed to forward webhook to n8n.");
+      }
+    } catch (error) {
+      console.error("[stripe webhook] n8n request failed", error);
+      return res.status(502).send("Failed to reach n8n webhook.");
+    }
+
+    return res.json({ received: true });
+  });
+
   // Create Stripe checkout session
   app.post("/api/checkout/create-session", async (req, res) => {
     try {
@@ -403,6 +513,22 @@ export async function registerRoutes(
         specialInstructions,
         items
       } = req.body;
+
+      const orderItemsForWebhook: Array<{
+        productId: string;
+        productName: string;
+        productCategory: string | null;
+        productVariantId: string;
+        variantName: string;
+        sku: string;
+        quantity: number;
+        unitPrice: number;
+        imageUrl: string;
+        shippingRequired: boolean;
+        selectedOptions: Array<{ name: string; value: string }>;
+        customization: unknown;
+        variantData: Record<string, unknown> | null;
+      }> = [];
 
       // Validate items and calculate total
       let subtotal = 0;
@@ -443,6 +569,30 @@ export async function registerRoutes(
 
         const itemTotal = Number(variantData.price) * item.quantity;
         subtotal += itemTotal;
+
+        const selectedOptions = [
+          item.variantData?.option1,
+          item.variantData?.option2,
+          item.variantData?.option3,
+        ].filter((option): option is { name: string; value: string } =>
+          Boolean(option?.name && option?.value)
+        );
+
+        orderItemsForWebhook.push({
+          productId: String(item.productId || variantData.productId || ""),
+          productName: item.productName || variantData.name || "Product",
+          productCategory: item.productCategory || null,
+          productVariantId: String(variantData.id),
+          variantName: variantData.name,
+          sku: item.variantData?.sku || variantData.sku || "",
+          quantity: item.quantity,
+          unitPrice: Math.round(Number(variantData.price) * 100),
+          imageUrl: item.variantData?.imageUrl || variantData.imageUrl || item.imageUrl || "",
+          shippingRequired: collectionOnlyItem ? false : (variantData.shippingRequired ?? true),
+          selectedOptions,
+          customization: item.customization ?? null,
+          variantData: item.variantData || null,
+        });
 
         // Create line item for Stripe
         lineItems.push({
@@ -512,6 +662,9 @@ export async function registerRoutes(
         "Collection: Monday to Saturday at our kitchen in Rathcoole, Dublin 24. Sundays at People's Park, Dun Laoghaire.";
       const deliveryMessage = "Shipping via An Post. Delivery in 3-5 business days for EUR 6.99.";
       const fulfillmentLabel = deliveryType === 'delivery' ? 'Delivery' : 'Collection';
+      const shippingAmount = shipping.price;
+      const shippingAddressMetadata = shippingAddress ? JSON.stringify(shippingAddress) : "";
+      const orderItemsMetadata = JSON.stringify(orderItemsForWebhook);
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -545,17 +698,26 @@ export async function registerRoutes(
             },
         metadata: {
           customer_name: customerName,
+          customer_email: customerEmail,
           customer_phone: customerPhone || '',
           delivery_type: deliveryType,
           special_instructions: specialInstructions || '',
+          shipping_amount: String(shippingAmount),
+          shipping_address: shippingAddressMetadata,
+          order_items: orderItemsMetadata,
         },
         payment_intent_data: {
           description: `Fulfillment: ${fulfillmentLabel}`,
           metadata: {
+            customer_email: customerEmail,
             delivery_type: deliveryType,
             fulfillment_method: fulfillmentLabel.toLowerCase(),
             customer_name: customerName,
             customer_phone: customerPhone || '',
+            special_instructions: specialInstructions || '',
+            shipping_amount: String(shippingAmount),
+            shipping_address: shippingAddressMetadata,
+            order_items: orderItemsMetadata,
           },
         },
       });

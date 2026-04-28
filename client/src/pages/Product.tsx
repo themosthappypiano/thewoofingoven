@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import { useProduct } from "@/hooks/use-api";
 import { useCart } from "@/store/use-cart";
-import { ShoppingBag, ChevronDown, ChevronUp } from "lucide-react";
+import { ShoppingBag, ChevronDown, ChevronUp, Clock3 } from "lucide-react";
 import { isCollectionOnlyProduct } from "@shared/delivery-rules";
 import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
@@ -57,6 +57,7 @@ export default function ProductPage() {
   const isWoofles = product?.name === 'Woofles';
   const isDognuts = product?.name === 'Dognuts';
   const isBarkdayBox = product?.name === 'Barkday Box';
+  const isBirthdayCake = product?.name === "Doggy Birthday Cake";
   const isCollectionOnly = isCollectionOnlyProduct(product);
   const useCakeSelectors = isCake && !isPupcakes;
   const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign || selectedDesign === "Deluxe/Bespoke";
@@ -729,6 +730,22 @@ export default function ProductPage() {
                   return <p className="text-accent/80">{product.description}</p>;
                 })()}
               </div>
+
+              {isBirthdayCake && (
+                <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-full bg-primary/15 p-2 text-primary">
+                      <Clock3 size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-accent">Freshly made to order</h3>
+                      <p className="mt-1 text-sm text-accent/80">
+                        Please allow at least <strong>5 days of preparation</strong> before collection so we can keep your pup&apos;s cake fresh and beautifully personalised.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <Button
                 className="w-full gap-2"

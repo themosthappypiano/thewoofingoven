@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, ShoppingBag, Heart } from "lucide-react";
+import { X, ShoppingBag, Heart, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/store/use-cart";
 import { isCollectionOnlyProduct } from "@shared/delivery-rules";
@@ -44,6 +44,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
   const { requestCollectionOnlyConfirm, dialog: collectionOnlyDialog } = useCollectionOnlyConfirm();
   const variants = product?.variants || [];
   const selectedVariant = variants.find((variant) => variant.id === selectedVariantId) || variants[0] || null;
+  const isBirthdayCake = product?.name === "Doggy Birthday Cake";
   const isCollectionOnly = isCollectionOnlyProduct(product);
 
   useEffect(() => {
@@ -219,6 +220,22 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                 </div>
               </div>
 
+              {isBirthdayCake && (
+                <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-full bg-primary/15 p-2 text-primary">
+                      <Clock3 size={18} />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-accent">Freshly made to order</h3>
+                      <p className="mt-1 text-sm text-accent/80">
+                        Please allow at least <strong>5 days of preparation</strong> before collection so we can keep your pup&apos;s cake fresh and beautifully personalised.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Product Details */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
@@ -236,7 +253,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                 <Button
                   className="flex-1 gap-2"
                   onClick={() => {
-                    const cartVariant = selectedVariant
+                        const cartVariant = selectedVariant
                       ? {
                           id: selectedVariant.id,
                           productId: product.id,
@@ -245,6 +262,9 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                           price: selectedVariant.price,
                           imageUrl: selectedVariant.imageUrl || product.imageUrl,
                           shippingRequired: isCollectionOnly ? false : (selectedVariant.shippingRequired ?? true),
+                          option1: selectedVariant.option1,
+                          option2: selectedVariant.option2,
+                          option3: selectedVariant.option3,
                         }
                       : undefined;
                     if (isCollectionOnly) {
