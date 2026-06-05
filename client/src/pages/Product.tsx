@@ -140,19 +140,18 @@ export default function ProductPage() {
   }, [parsedVariants, selectedDesign, selectedFlavor, useCakeSelectors, cakeVariants]);
   const isDeluxe = selectedDesign === "Deluxe/Bespoke";
   const isBoneShaped = selectedDesign === "Bone Shaped Design";
+  const hasCompleteCakeSelection =
+    !useCakeSelectors || isDeluxe || isBoneShaped || Boolean(selectedDesign && selectedCakeFlavor && selectedSize);
   const selectedVariant =
     (useCakeSelectors
-      ? cakeVariants.find(
-          (variant: any) =>
-            variant.design === selectedDesign &&
-            variant.base === selectedCakeFlavor &&
-            variant.size === selectedSize
-        ) ||
-        cakeVariants.find(
-          (variant: any) =>
-            variant.design === selectedDesign && variant.base === selectedCakeFlavor
-        ) ||
-        cakeVariants.find((variant: any) => variant.design === selectedDesign)
+      ? hasCompleteCakeSelection && !isDeluxe && !isBoneShaped
+        ? cakeVariants.find(
+            (variant: any) =>
+              variant.design === selectedDesign &&
+              variant.base === selectedCakeFlavor &&
+              variant.size === selectedSize
+          )
+        : null
       : isTrainingTreats
         ? parsedVariants.find(
             (variant) =>
@@ -165,8 +164,10 @@ export default function ProductPage() {
               (variant) => variant.name.includes(selectedPackOption)
             ) ||
             parsedVariants.find((variant) => variant.id === selectedVariantId)) ||
-    parsedVariants[0] ||
+    (useCakeSelectors ? null : parsedVariants[0]) ||
     null;
+  const requiresCakeSelection = useCakeSelectors && !isDeluxe && !isBoneShaped && !hasCompleteCakeSelection;
+  const canAddToCart = !isDeluxe && !isBoneShaped && (!useCakeSelectors || Boolean(selectedVariant));
 
   // Product descriptions based on user's detailed content
   const productDescriptions: Record<string, { short: string; full: string }> = {
@@ -475,7 +476,11 @@ export default function ProductPage() {
                    isBoneShaped ? 
                      (selectedCakeFlavor === "Chicken & Spinach" || selectedCakeFlavor === "Red Velvet (Beef & Beetroot)" ? 
                        "From 70 euros" : "From 65 euros") :
-                     `EUR ${(Number(selectedVariant?.price ?? product.price) || 0).toFixed(2)}`}
+                     requiresCakeSelection
+                       ? "Select options for price"
+                       : selectedVariant
+                         ? `EUR ${(Number(selectedVariant.price) || 0).toFixed(2)}`
+                         : "Selection unavailable"}
                 </p>
               </div>
 
@@ -750,7 +755,7 @@ export default function ProductPage() {
               <Button
                 className="w-full gap-2"
                 onClick={() => {
-                  if (isDeluxe || isBoneShaped) return;
+                  if (!canAddToCart || !selectedVariant) return;
                   const cartVariant = selectedVariant
                     ? {
                         id: selectedVariant.id,
@@ -774,10 +779,16 @@ export default function ProductPage() {
                   }
                   addItem(product, cartVariant, 1, customization);
                 }}
-                disabled={isDeluxe || isBoneShaped}
+                disabled={!canAddToCart}
               >
                 <ShoppingBag size={18} />
-                {isDeluxe || isBoneShaped ? "Email to Order" : "Add to Cart"}
+                {isDeluxe || isBoneShaped
+                  ? "Email to Order"
+                  : requiresCakeSelection
+                    ? "Choose cake options"
+                    : selectedVariant
+                      ? "Add to Cart"
+                      : "Selection unavailable"}
               </Button>
             </div>
           </div>

@@ -80,6 +80,7 @@ export function FeaturedProducts() {
               const finalFallbackImage =
                 curatedImageFallbacks[product.name] ||
                 `https://placehold.co/500x500?text=${encodeURIComponent(product.name)}`;
+              const requiresOptions = product.name === "Doggy Birthday Cake";
 
               return (
               <div key={product.id} className="group relative bg-white border border-border rounded-3xl p-4 shadow-sm hover:shadow-soft-hover transition-all duration-300 hover:-translate-y-1">
@@ -132,13 +133,22 @@ export function FeaturedProducts() {
                   <p className="text-primary font-bold text-lg font-primary">€{(Number(product.price) || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    className="flex-1 gap-2" 
-                    onClick={() => addItem(product, product.variants?.[0])}
-                  >
-                    <ShoppingBag size={18} />
-                    Add to Cart
-                  </Button>
+                  {requiresOptions ? (
+                    <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="flex-1">
+                      <Button className="w-full gap-2">
+                        <ShoppingBag size={18} />
+                        View Options
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      className="flex-1 gap-2"
+                      onClick={() => addItem(product, product.variants?.[0])}
+                    >
+                      <ShoppingBag size={18} />
+                      Add to Cart
+                    </Button>
+                  )}
                   <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`}>
                     <Button variant="outline" className="px-3">
                       View

@@ -127,6 +127,7 @@ export default function Shop() {
                         : (defaultCartVariant.shippingRequired ?? true),
                     }
                   : undefined;
+                const requiresOptions = product.name === "Doggy Birthday Cake";
                 return (
                 <div
                   key={product.id}
@@ -159,19 +160,28 @@ export default function Shop() {
                     <p className="text-primary font-bold text-lg">€{displayPrice.toFixed(2)}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      className="flex-1 gap-2" 
-                      onClick={() => {
-                        if (isCollectionOnlyProduct(product)) {
-                          requestCollectionOnlyConfirm(product.name, () => addItem(product, quickAddVariant));
-                          return;
-                        }
-                        addItem(product, quickAddVariant);
-                      }}
-                    >
-                      <ShoppingBag size={18} />
-                      Add to Cart
-                    </Button>
+                    {requiresOptions ? (
+                      <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="flex-1">
+                        <Button className="w-full gap-2">
+                          <ShoppingBag size={18} />
+                          View Options
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        className="flex-1 gap-2"
+                        onClick={() => {
+                          if (isCollectionOnlyProduct(product)) {
+                            requestCollectionOnlyConfirm(product.name, () => addItem(product, quickAddVariant));
+                            return;
+                          }
+                          addItem(product, quickAddVariant);
+                        }}
+                      >
+                        <ShoppingBag size={18} />
+                        Add to Cart
+                      </Button>
+                    )}
                     <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`}>
                       <Button variant="outline" className="px-3">
                         View
