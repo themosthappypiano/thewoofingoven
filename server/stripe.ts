@@ -1,12 +1,26 @@
 import Stripe from 'stripe';
 import { isCollectionOnlyCartItem } from '../shared/delivery-rules';
 
-// Initialize Stripe with secret key or use dummy for development
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_development';
+const dummyStripeSecretKey = 'sk_test_dummy_key_for_development';
+const configuredStripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() || '';
 
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2023-10-16',
-});
+export const isStripeMockMode =
+  process.env.NODE_ENV !== 'production' &&
+  (!configuredStripeSecretKey || configuredStripeSecretKey === dummyStripeSecretKey);
+
+export const stripeConfigurationError =
+  !configuredStripeSecretKey
+    ? 'STRIPE_SECRET_KEY is missing'
+    : configuredStripeSecretKey.includes('*') ||
+        !/^sk_(test|live)_[A-Za-z0-9]+$/.test(configuredStripeSecretKey)
+      ? 'STRIPE_SECRET_KEY is not a valid Stripe secret key'
+      : null;
+
+const stripeSecretKey = isStripeMockMode
+  ? dummyStripeSecretKey
+  : configuredStripeSecretKey || dummyStripeSecretKey;
+
+export const stripe = new Stripe(stripeSecretKey);
 
 export const SHIPPING_RATES = {
   collection: {

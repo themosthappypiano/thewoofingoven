@@ -4,11 +4,57 @@ import type Stripe from "stripe";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import { stripe, calculateShipping, SHIPPING_RATES } from "./stripe";
+import {
+  stripe,
+  calculateShipping,
+  SHIPPING_RATES,
+  isStripeMockMode,
+  stripeConfigurationError,
+} from "./stripe";
 import { db as dbPromise } from "./db";
 import { products, productVariants } from "@shared/schema";
 import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
 import { eq } from "drizzle-orm";
+
+const STRIPE_METADATA_CHUNK_SIZE = 450;
+const STRIPE_METADATA_MAX_FIELDS = 50;
+
+function chunkStripeMetadata(prefix: string, value: string): Record<string, string> {
+  if (!value) return {};
+
+  const chunks: string[] = [];
+  for (let index = 0; index < value.length; index += STRIPE_METADATA_CHUNK_SIZE) {
+    chunks.push(value.slice(index, index + STRIPE_METADATA_CHUNK_SIZE));
+  }
+
+  return chunks.reduce<Record<string, string>>(
+    (metadata, chunk, index) => {
+      metadata[`${prefix}_${index}`] = chunk;
+      return metadata;
+    },
+    { [`${prefix}_count`]: String(chunks.length) },
+  );
+}
+
+function readStripeMetadata(
+  metadata: Stripe.Metadata,
+  prefix: string,
+): string | null {
+  // Support payments created before metadata chunking was introduced.
+  if (metadata[prefix]) return metadata[prefix];
+
+  const chunkCount = Number(metadata[`${prefix}_count`] || 0);
+  if (!Number.isInteger(chunkCount) || chunkCount < 1) return null;
+
+  const chunks: string[] = [];
+  for (let index = 0; index < chunkCount; index += 1) {
+    const chunk = metadata[`${prefix}_${index}`];
+    if (typeof chunk !== "string") return null;
+    chunks.push(chunk);
+  }
+
+  return chunks.join("");
+}
 
 async function seedDatabase() {
   const db = await dbPromise;
@@ -446,16 +492,21 @@ export async function registerRoutes(
     let orderItems: Array<Record<string, unknown>> = [];
 
     try {
-      shippingAddress = paymentIntent.metadata.shipping_address
-        ? JSON.parse(paymentIntent.metadata.shipping_address)
+      const shippingAddressJson = readStripeMetadata(
+        paymentIntent.metadata,
+        "shipping_address",
+      );
+      shippingAddress = shippingAddressJson
+        ? JSON.parse(shippingAddressJson)
         : null;
     } catch (error) {
       console.error("[stripe webhook] failed to parse shipping address metadata", error);
     }
 
     try {
-      orderItems = paymentIntent.metadata.order_items
-        ? JSON.parse(paymentIntent.metadata.order_items)
+      const orderItemsJson = readStripeMetadata(paymentIntent.metadata, "order_items");
+      orderItems = orderItemsJson
+        ? JSON.parse(orderItemsJson)
         : [];
     } catch (error) {
       console.error("[stripe webhook] failed to parse order items metadata", error);
@@ -637,8 +688,8 @@ export async function registerRoutes(
         });
       }
 
-      // For development without real Stripe credentials
-      if (process.env.STRIPE_SECRET_KEY === 'sk_test_dummy_key_for_development') {
+      // Allow local checkout flow testing without contacting Stripe.
+      if (isStripeMockMode) {
         // Return mock checkout session
         const mockOrder = {
           id: Math.floor(Math.random() * 10000),
@@ -657,6 +708,13 @@ export async function registerRoutes(
         });
       }
 
+      if (stripeConfigurationError) {
+        console.error(`[checkout] ${stripeConfigurationError}`);
+        return res.status(503).json({
+          message: 'Payment service is not configured. Please try again later.',
+        });
+      }
+
       // Real Stripe checkout session
       const collectionMessage =
         "Collection: Monday to Saturday at our kitchen in Rathcoole, Dublin 24. Sundays at People's Park, Dun Laoghaire.";
@@ -665,6 +723,23 @@ export async function registerRoutes(
       const shippingAmount = shipping.price;
       const shippingAddressMetadata = shippingAddress ? JSON.stringify(shippingAddress) : "";
       const orderItemsMetadata = JSON.stringify(orderItemsForWebhook);
+      const paymentIntentMetadata: Record<string, string> = {
+        customer_email: customerEmail,
+        delivery_type: deliveryType,
+        fulfillment_method: fulfillmentLabel.toLowerCase(),
+        customer_name: customerName,
+        customer_phone: customerPhone || '',
+        special_instructions: specialInstructions || '',
+        shipping_amount: String(shippingAmount),
+        ...chunkStripeMetadata("shipping_address", shippingAddressMetadata),
+        ...chunkStripeMetadata("order_items", orderItemsMetadata),
+      };
+
+      if (Object.keys(paymentIntentMetadata).length > STRIPE_METADATA_MAX_FIELDS) {
+        return res.status(400).json({
+          message: 'This order contains too much customization data. Please contact us to place it.',
+        });
+      }
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -703,22 +778,10 @@ export async function registerRoutes(
           delivery_type: deliveryType,
           special_instructions: specialInstructions || '',
           shipping_amount: String(shippingAmount),
-          shipping_address: shippingAddressMetadata,
-          order_items: orderItemsMetadata,
         },
         payment_intent_data: {
           description: `Fulfillment: ${fulfillmentLabel}`,
-          metadata: {
-            customer_email: customerEmail,
-            delivery_type: deliveryType,
-            fulfillment_method: fulfillmentLabel.toLowerCase(),
-            customer_name: customerName,
-            customer_phone: customerPhone || '',
-            special_instructions: specialInstructions || '',
-            shipping_amount: String(shippingAmount),
-            shipping_address: shippingAddressMetadata,
-            order_items: orderItemsMetadata,
-          },
+          metadata: paymentIntentMetadata,
         },
       });
 
@@ -729,7 +792,7 @@ export async function registerRoutes(
 
     } catch (error) {
       console.error('Checkout error:', error);
-      res.status(500).json({ message: 'Checkout failed', error: error.message });
+      res.status(500).json({ message: 'Checkout failed' });
     }
   });
 
