@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.thewoofingoven.ie/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.thewoofingoven.ie/shop</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.thewoofingoven.ie/ingredients</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.thewoofingoven.ie/faq</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.thewoofingoven.ie/for-business</loc>
+    <priority>0.6</priority>
+  </url>
+</urlset>
