@@ -83,6 +83,16 @@ export default function ProductPage() {
     return trimmed;
   };
 
+  const getCakeBaseFromFlavor = (flavor: string) =>
+    flavor === "Chicken & Spinach" || flavor === "Red Velvet (Beef & Beetroot)"
+      ? "Protein"
+      : "Non-Protein";
+
+  const doesCakeBaseMatchFlavor = (base: string, flavor: string) => {
+    const selectedBase = getCakeBaseFromFlavor(flavor);
+    return base === flavor || base === selectedBase;
+  };
+
   const cakeVariants = useMemo(() => {
     if (!isCake) return [];
     return parsedVariants.map((variant) => {
@@ -94,9 +104,9 @@ export default function ProductPage() {
           data = null;
         }
       }
-      const design = normalizeCakeDesign(data?.Design ?? variant.design);
-      const base = data?.Base ?? variant.flavor;
-      const size = data?.Size ?? variant.size;
+      const design = normalizeCakeDesign(data?.Design ?? data?.option1Value ?? variant.design);
+      const base = data?.Base ?? data?.Flavour ?? data?.option2Value ?? variant.flavor;
+      const size = data?.Size ?? data?.option3Value ?? variant.size;
       return { ...variant, design, base, size };
     });
   }, [parsedVariants, isCake]);
@@ -126,7 +136,10 @@ export default function ProductPage() {
           .filter(
             (variant: any) =>
               (!selectedDesign || variant.design === selectedDesign) &&
-              (!selectedFlavor || (useCakeSelectors ? variant.base : variant.flavor) === selectedFlavor)
+              (!useCakeSelectors ||
+                !selectedCakeFlavor ||
+                doesCakeBaseMatchFlavor(variant.base, selectedCakeFlavor)) &&
+              (useCakeSelectors || !selectedFlavor || variant.flavor === selectedFlavor)
           )
           .map((variant: any) => (useCakeSelectors ? variant.size : variant.size))
       )
@@ -137,20 +150,38 @@ export default function ProductPage() {
       if (Number.isFinite(aNum) && Number.isFinite(bNum)) return aNum - bNum;
       return a.localeCompare(b);
     });
-  }, [parsedVariants, selectedDesign, selectedFlavor, useCakeSelectors, cakeVariants]);
+  }, [parsedVariants, selectedDesign, selectedFlavor, selectedCakeFlavor, useCakeSelectors, cakeVariants]);
   const isDeluxe = selectedDesign === "Deluxe/Bespoke";
   const isBoneShaped = selectedDesign === "Bone Shaped Design";
   const hasCompleteCakeSelection =
     !useCakeSelectors || isDeluxe || isBoneShaped || Boolean(selectedDesign && selectedCakeFlavor && selectedSize);
+  const matchingCakeVariants = useMemo(() => {
+    if (!useCakeSelectors || !hasCompleteCakeSelection || isDeluxe || isBoneShaped) {
+      return [];
+    }
+
+    return cakeVariants.filter(
+      (variant: any) =>
+        variant.design === selectedDesign &&
+        variant.size === selectedSize &&
+        doesCakeBaseMatchFlavor(variant.base, selectedCakeFlavor)
+    );
+  }, [
+    cakeVariants,
+    hasCompleteCakeSelection,
+    isBoneShaped,
+    isDeluxe,
+    selectedCakeFlavor,
+    selectedDesign,
+    selectedSize,
+    useCakeSelectors,
+  ]);
   const selectedVariant =
     (useCakeSelectors
       ? hasCompleteCakeSelection && !isDeluxe && !isBoneShaped
-        ? cakeVariants.find(
-            (variant: any) =>
-              variant.design === selectedDesign &&
-              variant.base === selectedCakeFlavor &&
-              variant.size === selectedSize
-          )
+        ? matchingCakeVariants.find((variant: any) => variant.base === selectedCakeFlavor) ??
+          matchingCakeVariants[0] ??
+          null
         : null
       : isTrainingTreats
         ? parsedVariants.find(
