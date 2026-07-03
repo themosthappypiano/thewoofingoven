@@ -85,7 +85,7 @@ async function seedDatabase() {
       {
         name: "Training Treats",
         description: "Pee-Nutz, Tuna Puffs, and Cheesy Bites training treats. 120g packs with multi-pack savings.",
-        basePrice: "7.00",
+        basePrice: "7.50",
         imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389",
         category: "treat",
         isFeatured: false,

@@ -8,7 +8,7 @@ export default function CheckoutCancel() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 flex items-center justify-center pt-32 pb-24 px-4">
+      <main className="flex-1 flex items-center justify-center pt-44 pb-24 px-4">
         <div className="bg-white p-12 rounded-[3rem] shadow-soft max-w-xl w-full text-center border border-border">
           <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-600">
             <AlertCircle size={40} />

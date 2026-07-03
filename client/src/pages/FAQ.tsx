@@ -69,7 +69,7 @@ export default function FAQ() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-24 sm:pt-32 lg:pt-36 pb-24">
+      <main className="flex-1 pt-36 sm:pt-44 lg:pt-48 pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-10">
             

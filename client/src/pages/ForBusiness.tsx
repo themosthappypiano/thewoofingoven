@@ -63,7 +63,7 @@ export default function ForBusiness() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FFF8EE]">
       <Navbar />
-      <main className="flex-1 pt-24 sm:pt-32 lg:pt-36 pb-24">
+      <main className="flex-1 pt-36 sm:pt-44 lg:pt-48 pb-24">
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-[2.25rem] bg-white px-6 py-10 md:px-10 md:py-12 shadow-soft border border-[#F5C842]/20">
             <div className="max-w-3xl space-y-5">

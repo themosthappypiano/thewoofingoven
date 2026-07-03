@@ -24,7 +24,7 @@ export function Hero() {
     return () => clearInterval(interval);
   }, [heroImages.length]);
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+    <section className="relative pt-44 pb-20 md:pt-52 md:pb-28 overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute top-20 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl -z-10" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary rounded-full blur-3xl -z-10" />

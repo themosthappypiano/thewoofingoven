@@ -129,7 +129,7 @@ export default function Checkout() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center pt-32 pb-24 px-4">
+        <main className="flex-1 flex items-center justify-center pt-44 pb-24 px-4">
           <div className="bg-white p-12 rounded-[3rem] shadow-soft max-w-lg w-full text-center border border-border">
             <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
               <CheckCircle2 size={40} />
@@ -264,7 +264,7 @@ export default function Checkout() {
               </div>
 
               {/* Order Summary */}
-              <div className="lg:col-span-5 bg-secondary p-8 rounded-3xl border border-border sticky top-32">
+              <div className="lg:col-span-5 bg-secondary p-8 rounded-3xl border border-border sticky top-44">
                 <h2 className="text-2xl font-display font-bold text-accent mb-6">Order Summary</h2>
                 
                 <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">

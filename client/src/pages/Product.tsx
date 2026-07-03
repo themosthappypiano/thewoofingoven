@@ -59,6 +59,7 @@ export default function ProductPage() {
   const isBarkdayBox = product?.name === 'Barkday Box';
   const isBirthdayCake = product?.name === "Doggy Birthday Cake";
   const isCollectionOnly = isCollectionOnlyProduct(product);
+  const trainingPackOptions = ["1 Pack", "3 Packs — Paws for Venezuela", "4 Packs"];
   const useCakeSelectors = isCake && !isPupcakes;
   const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign || selectedDesign === "Deluxe/Bespoke";
   const parsedVariants: ParsedVariant[] = useMemo(
@@ -220,7 +221,7 @@ export default function ProductPage() {
     },
     "Training Treats": {
       short: "A selection of small, motivating training treats including Pee-Nutz, Tuna Puffs, and Cheesy Bites.",
-      full: "Our Training Treats collection includes three different flavors perfect for training sessions:\n\n**Pee-Nutz** - Tiny peanut butter training treats\n**Tuna Puffs** - Soft tuna & flaxseed training bites\n**Cheesy Bites** - Soft mozzarella training treats\n\nAll treats are small-sized, easy to chew, and perfect for frequent rewards during training without overfeeding."
+      full: "Our Training Treats collection includes three different flavors perfect for training sessions:\n\n**Pee-Nutz** - Tiny peanut butter training treats\n**Tuna Puffs** - Soft tuna & flaxseed training bites\n**Cheesy Bites** - Soft mozzarella training treats\n\n🇻🇪🐾 Paws for Venezuela special:\nChoose 3 packs for €20 and help support dogs in Venezuela through Red de Apoyo Canino.\n\nAll treats are small-sized, easy to chew, and perfect for frequent rewards during training without overfeeding."
     },
     "Woofles": {
       short: "Our signature grain-free soft carrot waffles, the very first treat created at The Woofing Oven.",
@@ -435,7 +436,7 @@ export default function ProductPage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <main className="flex-1 pt-32 pb-24">
+        <main className="flex-1 pt-44 pb-24">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="animate-pulse bg-secondary rounded-3xl h-[560px]" />
           </div>
@@ -449,7 +450,7 @@ export default function ProductPage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <main className="flex-1 pt-32 pb-24">
+        <main className="flex-1 pt-44 pb-24">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-3xl font-display font-bold text-accent mb-4">Product not found</h1>
             <Link href="/shop" className="text-primary font-semibold hover:underline">Back to Shop</Link>
@@ -463,7 +464,7 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-1 pt-24 sm:pt-32 lg:pt-36 pb-24">
+      <main className="flex-1 pt-36 sm:pt-44 lg:pt-48 pb-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             href="/shop"
@@ -679,7 +680,7 @@ export default function ProductPage() {
 
                       <div className="text-sm font-semibold text-accent/80 mb-2">Pack</div>
                       <div className="flex flex-wrap gap-2">
-                        {["1 Pack", "4 Packs"].map((pack) => (
+                        {trainingPackOptions.map((pack) => (
                           <button
                             key={pack}
                             onClick={() => {
@@ -693,8 +694,15 @@ export default function ProductPage() {
                             }`}
                           >
                             <div className="font-semibold text-sm">{pack}</div>
+                            {pack === "3 Packs — Paws for Venezuela" && (
+                              <div className="mt-1 text-xs text-accent/70">€20 campaign pack</div>
+                            )}
                           </button>
                         ))}
+                      </div>
+                      <div className="mt-3 rounded-2xl border border-[#A40000]/25 bg-[#FFF8EE] px-4 py-3 text-sm leading-6 text-accent">
+                        <strong>🇻🇪🐾 Paws for Venezuela special:</strong>{" "}
+                        Choose 3 packs for €20 and help support dogs in Venezuela through Red de Apoyo Canino. Available throughout July.
                       </div>
                     </>
                   )}
