@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { isCollectionOnlyCartItem } from '../shared/delivery-rules';
+import { hasOnlyDeliveryIncludedDeliverableItems, isCollectionOnlyCartItem } from '../shared/delivery-rules';
 
 const dummyStripeSecretKey = 'sk_test_dummy_key_for_development';
 const configuredStripeSecretKey = process.env.STRIPE_SECRET_KEY?.trim() || '';
@@ -55,6 +55,14 @@ export function calculateShipping(
   // Delivery is only invalid when the full cart is collection-only.
   if (!hasShippableItems) {
     throw new Error('All items in your cart are collection only, so delivery is unavailable.');
+  }
+  if (hasOnlyDeliveryIncludedDeliverableItems(cartItems)) {
+    return {
+      id: 'included',
+      name: 'Delivery Included',
+      price: 0,
+      delivery_time: 'Included with Barkday Box Delivery',
+    };
   }
   return {
     id: SHIPPING_RATES.an_post.id,

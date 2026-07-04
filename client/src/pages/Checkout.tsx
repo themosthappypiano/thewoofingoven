@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Link, useLocation } from "wouter";
 import { CheckCircle2, ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
+import { hasOnlyDeliveryIncludedDeliverableItems, isCollectionOnlyCartItem } from "@shared/delivery-rules";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -43,6 +43,8 @@ export default function Checkout() {
   const hasDeliverableItems = items.some((item) => !isCollectionOnlyCartItem(item));
   const isDeliveryUnavailable = hasCollectionOnlyItems && !hasDeliverableItems;
   const effectiveDeliveryType = isDeliveryUnavailable ? "collection" : deliveryType;
+  const isDeliveryIncluded = effectiveDeliveryType === "delivery" && hasOnlyDeliveryIncludedDeliverableItems(items);
+  const deliveryFee = effectiveDeliveryType === "delivery" && !isDeliveryIncluded ? 6.99 : 0;
 
   const isPlaceholderImageUrl = (url?: string) => {
     if (!url) return true;
@@ -52,7 +54,8 @@ export default function Checkout() {
 
   const getCheckoutItemImage = (item: typeof items[number]) => {
     const curatedByProductName: Record<string, string> = {
-      Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+      "Barkday Box": "/images/products/barkday-box/barkday-box-haze.jpeg",
+      Pupcakes: "/images/products/pupcakes/pupcakes-standard-decoration.jpeg",
       Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
     };
 
@@ -243,7 +246,11 @@ export default function Checkout() {
                         />
                         <div>
                           <div className="font-semibold text-accent">Delivery</div>
-                          <div className="text-sm text-accent/60">An Post 3-5 business days - €6.99</div>
+                          <div className="text-sm text-accent/60">
+                            {hasOnlyDeliveryIncludedDeliverableItems(items)
+                              ? "Included with Barkday Box Delivery"
+                              : "An Post 3-5 business days - €6.99"}
+                          </div>
                         </div>
                       </label>
                     </div>
@@ -296,13 +303,17 @@ export default function Checkout() {
                       {effectiveDeliveryType === "delivery" ? "Delivery" : "Collection"}
                     </span>
                     <span>
-                      {effectiveDeliveryType === "delivery" ? "€6.99" : "Free"}
+                      {effectiveDeliveryType === "delivery"
+                        ? isDeliveryIncluded
+                          ? "Included"
+                          : "€6.99"
+                        : "Free"}
                     </span>
                   </div>
                   <div className="flex justify-between text-xl font-bold text-accent pt-2 border-t border-border/50">
                     <span>Total</span>
                     <span className="text-primary">
-                      €{(getCartTotal() + (effectiveDeliveryType === "delivery" ? 6.99 : 0)).toFixed(2)}
+                      €{(getCartTotal() + deliveryFee).toFixed(2)}
                     </span>
                   </div>
                 </div>

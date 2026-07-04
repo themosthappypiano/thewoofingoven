@@ -41,6 +41,7 @@ export default function ProductPage() {
   const [selectedTrainingFlavor, setSelectedTrainingFlavor] = useState<string>("Pee-Nutz");
   const [selectedTrainingPack, setSelectedTrainingPack] = useState<string>("1 Pack");
   const [selectedPackOption, setSelectedPackOption] = useState<string>("1 Pack");
+  const [selectedPupcakeStyle, setSelectedPupcakeStyle] = useState<string>("Standard Decoration");
   const [selectedPupcakeBox, setSelectedPupcakeBox] = useState<string>("Box of 2");
   const [isFlavorInfoOpen, setIsFlavorInfoOpen] = useState(false);
   const [isBenefitsOpen, setIsBenefitsOpen] = useState(false);
@@ -60,6 +61,13 @@ export default function ProductPage() {
   const isBirthdayCake = product?.name === "Doggy Birthday Cake";
   const isCollectionOnly = isCollectionOnlyProduct(product);
   const trainingPackOptions = ["1 Pack", "3 Packs — Paws for Venezuela", "4 Packs"];
+  const pupcakeStyleOptions = ["Standard Decoration", "Barkday Pupcakes", "Personalised Barkday Pupcakes"];
+  const pupcakeBoxOptionsByStyle: Record<string, string[]> = {
+    "Standard Decoration": ["Box of 2", "Box of 4", "Box of 6", "Box of 12", "Box of 24"],
+    "Barkday Pupcakes": ["Box of 2", "Box of 4"],
+    "Personalised Barkday Pupcakes": ["Box of 2", "Box of 4"],
+  };
+  const pupcakeBoxOptions = pupcakeBoxOptionsByStyle[selectedPupcakeStyle] ?? pupcakeBoxOptionsByStyle["Standard Decoration"];
   const useCakeSelectors = isCake && !isPupcakes;
   const shouldAutoRotateImages = !useCakeSelectors || !selectedDesign || selectedDesign === "Deluxe/Bespoke";
   const parsedVariants: ParsedVariant[] = useMemo(
@@ -111,6 +119,36 @@ export default function ProductPage() {
       return { ...variant, design, base, size };
     });
   }, [parsedVariants, isCake]);
+
+  const parseVariantData = (value: any) => {
+    if (!value) return null;
+    if (typeof value !== "string") return value;
+
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  };
+
+  const getPupcakeVariantStyle = (variant: Variant | ParsedVariant) => {
+    const data = parseVariantData(variant.variantData);
+    const style = data?.Style ?? data?.Design ?? data?.Decoration ?? data?.option1Value;
+    if (style) return String(style);
+
+    if (variant.name.includes("Personalised Barkday")) return "Personalised Barkday Pupcakes";
+    if (variant.name.includes("Barkday")) return "Barkday Pupcakes";
+    return "Standard Decoration";
+  };
+
+  const getPupcakeVariantBox = (variant: Variant | ParsedVariant) => {
+    const data = parseVariantData(variant.variantData);
+    const box = data?.Box ?? data?.Size ?? data?.Pack ?? data?.option2Value;
+    if (box) return String(box);
+
+    const boxMatch = variant.name.match(/Box of \d+/);
+    return boxMatch?.[0] ?? variant.name;
+  };
 
   const designs = useMemo(() => {
     const raw = useCakeSelectors
@@ -191,7 +229,12 @@ export default function ProductPage() {
               variant.name.includes(selectedTrainingPack)
           )
         : isPupcakes
-          ? parsedVariants.find((variant) => variant.name === selectedPupcakeBox || variant.name === `Apple & Carrot - ${selectedPupcakeBox} - Pack`)
+          ? parsedVariants.find(
+              (variant) =>
+                getPupcakeVariantStyle(variant) === selectedPupcakeStyle &&
+                getPupcakeVariantBox(variant) === selectedPupcakeBox
+            ) ||
+            parsedVariants.find((variant) => variant.name === selectedPupcakeBox || variant.name === `Apple & Carrot - ${selectedPupcakeBox} - Pack`)
           : parsedVariants.find(
               (variant) => variant.name.includes(selectedPackOption)
             ) ||
@@ -278,10 +321,22 @@ export default function ProductPage() {
       setSelectedCakeFlavor("Apple & Carrot");
       setSelectedTrainingFlavor("Pee-Nutz");
       setSelectedTrainingPack("1 Pack");
-      setSelectedPackOption(product.name === "Woofles" ? "4 Packs" : "1 Pack");
+      setSelectedPackOption(
+        product.name === "Woofles"
+          ? "4 Packs"
+          : product.name === "Barkday Box"
+            ? "Delivery"
+            : "1 Pack"
+      );
+      setSelectedPupcakeStyle("Standard Decoration");
       setSelectedPupcakeBox("Box of 2");
     }
   }, [product?.id, parsedVariants]);
+
+  useEffect(() => {
+    if (!isPupcakes || pupcakeBoxOptions.includes(selectedPupcakeBox)) return;
+    setSelectedPupcakeBox(pupcakeBoxOptions[0] ?? "Box of 2");
+  }, [isPupcakes, pupcakeBoxOptions, selectedPupcakeBox]);
 
   useEffect(() => {
     if (!useCakeSelectors) return;
@@ -312,10 +367,13 @@ export default function ProductPage() {
     }
 
     const barkdayBoxImages = [
-      "https://i.postimg.cc/PJVJF3xg/Whats-App-Image-2026-03-14-at-19-13-35.jpg",
-      "https://i.ibb.co/x8PrBc28/image.png",
-      "https://i.ibb.co/jPy7JDvm/image.png",
-      "https://i.postimg.cc/6qbq1jq9/Whats-App-Image-2026-03-14-at-19-13-18.jpg",
+      "/images/products/barkday-box/barkday-box-haze.jpeg",
+      "/images/products/barkday-box/barkday-box-winnie.jpeg",
+      "/images/products/barkday-box/barkday-box-charlie.jpeg",
+      "/images/products/barkday-box/barkday-box-archie-close.jpeg",
+      "/images/products/barkday-box/barkday-box-ruru.jpeg",
+      "/images/products/barkday-box/barkday-box-ellie.jpeg",
+      "/images/products/barkday-box/barkday-box-frankie.jpeg",
     ];
     const cakeDesignImages: Record<string, string[]> = {
       "Drip Design": [
@@ -355,7 +413,23 @@ export default function ProductPage() {
       "https://i.postimg.cc/yxY9Y2KL/Whats-App-Image-2025-10-15-at-21-35-34-(6).jpg",
       "https://i.postimg.cc/T1YmYBxC/Whats-App-Image-2025-10-15-at-21-35-34-(9).jpg",
     ];
-    const pupcakesImages = ["https://i.ibb.co/4RHFLxnN/image.png"];
+    const pupcakesImagesByStyle: Record<string, string[]> = {
+      "Standard Decoration": [
+        selectedPupcakeBox === "Box of 12" || selectedPupcakeBox === "Box of 24"
+          ? "/images/products/pupcakes/pupcakes-standard-large-box.jpeg"
+          : "/images/products/pupcakes/pupcakes-standard-decoration.jpeg",
+      ],
+      "Barkday Pupcakes": [
+        "/images/products/pupcakes/pupcakes-barkday-non-personalised.png",
+      ],
+      "Personalised Barkday Pupcakes": [
+        "/images/products/pupcakes/pupcakes-personalised-marnie-4.png",
+        "/images/products/pupcakes/pupcakes-personalised-zeus-5.png",
+        "/images/products/pupcakes/pupcakes-personalised-darcy-marnie-4.png",
+        "/images/products/pupcakes/pupcakes-personalised-zeus-5-close.png",
+      ],
+    };
+    const pupcakesImages = pupcakesImagesByStyle[selectedPupcakeStyle] ?? pupcakesImagesByStyle["Standard Decoration"];
     const dognutsImages = [
       "https://i.ibb.co/8L24cVhq/image.png",
       "https://i.ibb.co/23WhMt5L/image.png",
@@ -367,7 +441,9 @@ export default function ProductPage() {
       "https://i.ibb.co/bj4YCFwx/image.png",
     ];
     if (isPupcakes) {
-      return pupcakesImages;
+      return selectedVariant?.imageUrl && !pupcakesImages.includes(selectedVariant.imageUrl)
+        ? [selectedVariant.imageUrl, ...pupcakesImages]
+        : pupcakesImages;
     }
     if (isCake && selectedDesign && cakeDesignImages[selectedDesign]?.length) {
       // For Standard Personalised, show specific image based on size
@@ -409,6 +485,8 @@ export default function ProductPage() {
     isDognuts,
     isBarkdayBox,
     isWoofles,
+    selectedPupcakeBox,
+    selectedPupcakeStyle,
     selectedVariant?.imageUrl,
   ]);
 
@@ -707,29 +785,68 @@ export default function ProductPage() {
                     </>
                   )}
 
-                  {(isWoofles || isDognuts || isBarkdayBox || isPupcakes) && (
+                  {isPupcakes && (
+                    <>
+                      <div className="text-sm font-semibold text-accent/80 mb-2">Style</div>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {pupcakeStyleOptions.map((style) => (
+                          <button
+                            key={style}
+                            onClick={() => {
+                              setSelectedPupcakeStyle(style);
+                              setSelectedImage(0);
+                            }}
+                            className={`px-3 py-2 rounded-xl border text-left transition-colors ${
+                              selectedPupcakeStyle === style
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <div className="font-semibold text-sm">{style}</div>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="text-sm font-semibold text-accent/80 mb-2">Box Size</div>
+                      <div className="flex flex-wrap gap-2">
+                        {pupcakeBoxOptions.map((option) => (
+                          <button
+                            key={option}
+                            onClick={() => {
+                              setSelectedPupcakeBox(option);
+                              setSelectedImage(0);
+                            }}
+                            className={`px-3 py-2 rounded-xl border text-left transition-colors ${
+                              selectedPupcakeBox === option
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <div className="font-semibold text-sm">{option}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {(isWoofles || isDognuts || isBarkdayBox) && (
                     <div className="flex flex-wrap gap-2">
-                      {(isPupcakes
-                        ? ["Box of 2", "Box of 4", "Box of 6", "Box of 12", "Box of 24"]
-                        : isDognuts
-                          ? ["Box of 6", "Box of 12"]
-                          : isBarkdayBox
-                            ? ["Collection", "Delivery"]
-                            : isWoofles
-                              ? ["4 Packs"]
-                              : ["1 Pack", "4 Packs"]
+                      {(isDognuts
+                        ? ["Box of 6", "Box of 12"]
+                        : isBarkdayBox
+                          ? ["Collection", "Delivery"]
+                          : isWoofles
+                            ? ["4 Packs"]
+                            : ["1 Pack", "4 Packs"]
                       ).map((option) => (
                         <button
                           key={option}
                           onClick={() => {
-                            if (isPupcakes) setSelectedPupcakeBox(option);
-                            else setSelectedPackOption(option);
+                            setSelectedPackOption(option);
                             setSelectedImage(0);
                           }}
                           className={`px-3 py-2 rounded-xl border text-left transition-colors ${
-                            (isPupcakes
-                              ? selectedPupcakeBox
-                              : selectedPackOption) === option
+                            selectedPackOption === option
                               ? "border-primary bg-primary/10 text-primary"
                               : "border-border hover:border-primary/50"
                           }`}

@@ -5,8 +5,8 @@ type ProductLike = {
 
 type CartItemLike = {
   shippingRequired?: boolean;
-  variant?: { shippingRequired?: boolean };
-  variantData?: { shippingRequired?: boolean };
+  variant?: { shippingRequired?: boolean; name?: string };
+  variantData?: { shippingRequired?: boolean; name?: string };
   product?: ProductLike;
   productName?: string;
   productCategory?: string;
@@ -58,4 +58,25 @@ export function isCollectionOnlyCartItem(item?: CartItemLike | null): boolean {
   if (item.variantData?.shippingRequired === false) return true;
 
   return isCollectionOnlyProduct(product);
+}
+
+export function isDeliveryIncludedCartItem(item?: CartItemLike | null): boolean {
+  if (!item || isCollectionOnlyCartItem(item)) return false;
+
+  const product =
+    item.product ?? {
+      name: item.productName ?? item.name,
+      category: item.productCategory ?? item.category,
+    };
+  const { name } = normalizeProduct(product);
+  const variantName = String(item.variantData?.name ?? item.variant?.name ?? "").trim().toLowerCase();
+
+  return name === "barkday box" && variantName.includes("delivery") && !variantName.includes("collection");
+}
+
+export function hasOnlyDeliveryIncludedDeliverableItems(items?: CartItemLike[] | null): boolean {
+  if (!Array.isArray(items) || items.length === 0) return false;
+
+  const deliverableItems = items.filter((item) => !isCollectionOnlyCartItem(item));
+  return deliverableItems.length > 0 && deliverableItems.every((item) => isDeliveryIncludedCartItem(item));
 }

@@ -10,7 +10,17 @@ export function FeaturedProducts() {
 
   // Mock data fallback if backend fails/empty during development
   const displayProducts = products?.length ? products.slice(0, 4) : [
-    { id: 1, name: "Barkday Box", price: "30.00", category: "box", imageUrl: "https://i.ibb.co/0gpzNsx/image.png", variants: [{ id: "fallback-box-collect", name: "Collection", price: "30.00", shippingRequired: false }] },
+    {
+      id: 1,
+      name: "Barkday Box",
+      price: "40.00",
+      category: "box",
+      imageUrl: "/images/products/barkday-box/barkday-box-haze.jpeg",
+      variants: [
+        { id: "fallback-box-delivery", name: "Delivery", price: "40.00", imageUrl: "/images/products/barkday-box/barkday-box-haze.jpeg", shippingRequired: true },
+        { id: "fallback-box-collect", name: "Collection", price: "30.00", imageUrl: "/images/products/barkday-box/barkday-box-haze.jpeg", shippingRequired: false },
+      ],
+    },
     { id: 2, name: "Woofles", price: "40.00", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392", variants: [{ id: "fallback-woofles-4", name: "4 Packs", price: "40.00", shippingRequired: true }] },
     { id: 3, name: "Training Treats", price: "7.50", category: "treat", imageUrl: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/WhatsAppImage2025-10-15at22.00.56_3_eed392a1-7628-4abb-be3b-7ecc65ce2f51.jpg?v=1765216389", variants: [{ id: "fallback-train-1", name: "1 Pack", price: "7.50", shippingRequired: true }] },
     { id: 4, name: "Doggy Birthday Cake", price: "35.00", category: "cake", imageUrl: "https://i.postimg.cc/sXJ7zskn/Whats-App-Image-2025-10-15-at-21-35-26.jpg", variants: [{ id: "fallback-cake-3", name: "3 inch", price: "35.00", shippingRequired: true }] },
@@ -62,10 +72,10 @@ export function FeaturedProducts() {
                   : [];
               const variantImage = product.variants?.find((variant: any) => !isPlaceholderImageUrl(variant?.imageUrl))?.imageUrl;
               const curatedImageFallbacks: Record<string, string> = {
-                Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+                Pupcakes: "/images/products/pupcakes/pupcakes-standard-decoration.jpeg",
                 Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
                 Woofles: "https://cdn.shopify.com/s/files/1/0970/6799/1383/files/hmmmm.jpg?v=1765216392",
-                "Barkday Box": "https://i.postimg.cc/PJVJF3xg/Whats-App-Image-2026-03-14-at-19-13-35.jpg",
+                "Barkday Box": "/images/products/barkday-box/barkday-box-haze.jpeg",
                 "Doggy Birthday Cake": "https://i.postimg.cc/ZqX1PprN/Whats-App-Image-2025-10-15-at-21-35-26.jpg",
               };
               const firstValidImageUrl = parsedImageUrls.find((url: string) => !isPlaceholderImageUrl(url));
@@ -130,7 +140,7 @@ export function FeaturedProducts() {
                     </div>
                   )}
                   
-                  <p className="text-primary font-bold text-lg font-primary">€{(Number(product.price) || 0).toFixed(2)}</p>
+                  <p className="text-primary font-bold text-lg font-primary">€{(Number(product.name === "Barkday Box" ? product.variants?.find((variant: any) => variant.name === "Delivery")?.price : product.price) || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-2">
                   {requiresOptions ? (
@@ -143,7 +153,12 @@ export function FeaturedProducts() {
                   ) : (
                     <Button
                       className="flex-1 gap-2"
-                      onClick={() => addItem(product, product.variants?.[0])}
+                      onClick={() => {
+                        const defaultVariant = product.name === "Barkday Box"
+                          ? product.variants?.find((variant: any) => variant.name === "Delivery") || product.variants?.[0]
+                          : product.variants?.[0];
+                        addItem(product, defaultVariant);
+                      }}
                     >
                       <ShoppingBag size={18} />
                       Add to Cart

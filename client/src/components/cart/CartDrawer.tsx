@@ -27,7 +27,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   const getCartItemImage = (item: typeof items[number]) => {
     const curatedByProductName: Record<string, string> = {
-      Pupcakes: "https://i.postimg.cc/pr3hR08T/Whats-App-Image-2025-10-15-at-22-00-56-(4).jpg",
+      "Barkday Box": "/images/products/barkday-box/barkday-box-haze.jpeg",
+      Pupcakes: "/images/products/pupcakes/pupcakes-standard-decoration.jpeg",
       Dognuts: "https://i.postimg.cc/Pxz2Lwy3/Whats-App-Image-2025-10-15-at-21-54-09-(4).jpg",
     };
 
