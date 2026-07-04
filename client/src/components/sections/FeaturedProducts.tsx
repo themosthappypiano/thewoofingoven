@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/Button";
 import { useCart } from "@/store/use-cart";
 import { ShoppingBag } from "lucide-react";
 import { Link } from "wouter";
+import { getBarkdayBoxFreshConfirmOptions, useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 export function FeaturedProducts() {
   const { data: products, isLoading } = useProducts();
   const addItem = useCart((state) => state.addItem);
+  const { requestCollectionOnlyConfirm, dialog: collectionOnlyDialog } = useCollectionOnlyConfirm();
 
   // Mock data fallback if backend fails/empty during development
   const displayProducts = products?.length ? products.slice(0, 4) : [
@@ -157,6 +159,14 @@ export function FeaturedProducts() {
                         const defaultVariant = product.name === "Barkday Box"
                           ? product.variants?.find((variant: any) => variant.name === "Delivery") || product.variants?.[0]
                           : product.variants?.[0];
+                        if (product.name === "Barkday Box") {
+                          requestCollectionOnlyConfirm(
+                            product.name,
+                            () => addItem(product, defaultVariant),
+                            getBarkdayBoxFreshConfirmOptions(product.name)
+                          );
+                          return;
+                        }
                         addItem(product, defaultVariant);
                       }}
                     >
@@ -181,6 +191,7 @@ export function FeaturedProducts() {
             <Button variant="outline" className="w-full">View All Treats</Button>
           </Link>
         </div>
+        {collectionOnlyDialog}
       </div>
     </section>
   );

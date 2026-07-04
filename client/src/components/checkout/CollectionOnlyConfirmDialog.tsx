@@ -7,12 +7,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
+import type { ReactNode } from "react";
 
 interface CollectionOnlyConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   productName: string;
   onConfirm: () => void;
+  title?: string;
+  description?: ReactNode;
 }
 
 export function CollectionOnlyConfirmDialog({
@@ -20,6 +23,8 @@ export function CollectionOnlyConfirmDialog({
   onOpenChange,
   productName,
   onConfirm,
+  title = "Collection Only",
+  description,
 }: CollectionOnlyConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -27,14 +32,18 @@ export function CollectionOnlyConfirmDialog({
         <div className="bg-gradient-to-br from-secondary via-background to-primary/10 px-7 py-8 sm:px-9 sm:py-10">
           <DialogHeader className="text-left">
             <DialogTitle className="font-display text-3xl sm:text-4xl text-accent">
-              Collection Only
+              {title}
             </DialogTitle>
             <DialogDescription className="text-accent/80 pt-3 whitespace-pre-line text-base sm:text-lg leading-relaxed">
-              <span className="font-semibold text-accent">{productName}</span> are freshly made and available for collection only.
-              {"\n\n"}
-              To keep them at their best quality, we do not offer delivery for these items.
-              {"\n"}
-              Please confirm you are happy to collect your order.
+              {description ?? (
+                <>
+                  <span className="font-semibold text-accent">{productName}</span> are freshly made and available for collection only.
+                  {"\n\n"}
+                  To keep them at their best quality, we do not offer delivery for these items.
+                  {"\n"}
+                  Please confirm you are happy to collect your order.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
 

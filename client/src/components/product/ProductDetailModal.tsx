@@ -3,7 +3,7 @@ import { X, ShoppingBag, Heart, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/store/use-cart";
 import { isCollectionOnlyProduct } from "@shared/delivery-rules";
-import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
+import { getBarkdayBoxFreshConfirmOptions, useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 interface Product {
   id: number | string;
@@ -45,6 +45,7 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
   const variants = product?.variants || [];
   const selectedVariant = variants.find((variant) => variant.id === selectedVariantId) || variants[0] || null;
   const isBirthdayCake = product?.name === "Doggy Birthday Cake";
+  const isBarkdayBox = product?.name === "Barkday Box";
   const isCollectionOnly = isCollectionOnlyProduct(product);
 
   useEffect(() => {
@@ -267,6 +268,13 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
                           option3: selectedVariant.option3,
                         }
                       : undefined;
+                    if (isBarkdayBox) {
+                      requestCollectionOnlyConfirm(product.name, () => {
+                        addItem(product, cartVariant);
+                        onClose();
+                      }, getBarkdayBoxFreshConfirmOptions(product.name));
+                      return;
+                    }
                     if (isCollectionOnly) {
                       requestCollectionOnlyConfirm(product.name, () => {
                         addItem(product, cartVariant);

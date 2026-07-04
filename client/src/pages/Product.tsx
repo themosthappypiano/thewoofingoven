@@ -7,7 +7,7 @@ import { useProduct } from "@/hooks/use-api";
 import { useCart } from "@/store/use-cart";
 import { ShoppingBag, ChevronDown, ChevronUp, Clock3 } from "lucide-react";
 import { isCollectionOnlyProduct } from "@shared/delivery-rules";
-import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
+import { getBarkdayBoxFreshConfirmOptions, useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 type Variant = {
   id: string | number;
@@ -927,6 +927,12 @@ export default function ProductPage() {
                     isCake && selectedCakeFlavor
                       ? { flavor: selectedCakeFlavor }
                       : undefined;
+                  if (isBarkdayBox) {
+                    requestCollectionOnlyConfirm(product.name, () => {
+                      addItem(product, cartVariant, 1, customization);
+                    }, getBarkdayBoxFreshConfirmOptions(product.name));
+                    return;
+                  }
                   if (isCollectionOnly) {
                     requestCollectionOnlyConfirm(product.name, () => {
                       addItem(product, cartVariant, 1, customization);

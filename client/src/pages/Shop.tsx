@@ -7,7 +7,7 @@ import { ShoppingBag } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useEffect } from "react";
 import { isCollectionOnlyProduct } from "@shared/delivery-rules";
-import { useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
+import { getBarkdayBoxFreshConfirmOptions, useCollectionOnlyConfirm } from "@/hooks/use-collection-only-confirm";
 
 export default function Shop() {
   const { data: products, isLoading } = useProducts();
@@ -215,6 +215,14 @@ export default function Shop() {
                       <Button
                         className="flex-1 gap-2"
                         onClick={() => {
+                          if (product.name === "Barkday Box") {
+                            requestCollectionOnlyConfirm(
+                              product.name,
+                              () => addItem(product, quickAddVariant),
+                              getBarkdayBoxFreshConfirmOptions(product.name)
+                            );
+                            return;
+                          }
                           if (isCollectionOnlyProduct(product)) {
                             requestCollectionOnlyConfirm(product.name, () => addItem(product, quickAddVariant));
                             return;
