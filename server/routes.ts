@@ -56,6 +56,18 @@ function readStripeMetadata(
   return chunks.join("");
 }
 
+function getStripeImageUrl(imageUrl: unknown, requestOrigin: string): string | undefined {
+  if (typeof imageUrl !== "string" || !imageUrl.trim()) return undefined;
+
+  try {
+    const absoluteUrl = new URL(imageUrl, requestOrigin);
+    if (absoluteUrl.protocol !== "http:" && absoluteUrl.protocol !== "https:") return undefined;
+    return absoluteUrl.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 async function seedDatabase() {
   const db = await dbPromise;
   const existingProducts = await storage.getProducts();
@@ -645,6 +657,9 @@ export async function registerRoutes(
           variantData: item.variantData || null,
         });
 
+        const requestOrigin = String(req.headers.origin || `${req.protocol}://${req.get("host")}`);
+        const stripeImageUrl = getStripeImageUrl(variantData.imageUrl, requestOrigin);
+
         // Create line item for Stripe
         lineItems.push({
           price_data: {
@@ -652,7 +667,7 @@ export async function registerRoutes(
             product_data: {
               name: variantData.name,
               description: `SKU: ${variantData.sku}`,
-              images: variantData.imageUrl ? [variantData.imageUrl] : [],
+              images: stripeImageUrl ? [stripeImageUrl] : [],
               metadata: {
                 variant_id: String(variantData.id),
                 product_id: String(variantData.productId || ''),

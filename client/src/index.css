@@ -1,13 +1,5 @@
 /* The Woofing Oven Brand Fonts - Complete Collection */
 
-/* Avenir - Primary Typeface */
-@font-face {
-  font-family: 'Avenir';
-  src: url('/brand_assets/fonts/Avenir.ttc') format('truetype-collection');
-  font-weight: 100 900;
-  font-style: normal;
-}
-
 /* FTF Brotein - Display Font for Headings */
 @font-face {
   font-family: 'FTF Brotein';
@@ -150,7 +142,7 @@
     --radius: 1.5rem; /* Playful, large border radius */
 
     /* Brand Typography Hierarchy */
-    --font-primary: 'Avenir', system-ui, -apple-system, sans-serif;      /* Primary: Body text, general use */
+    --font-primary: system-ui, -apple-system, sans-serif;                /* Primary: Body text, general use */
     --font-display: 'FTF Brotein', cursive;                              /* Display: Playful headings/titles */
     --font-script: 'Hittedal Script', cursive;                           /* Script: Taglines like "Bake, Bark, Love!" */
     --font-caps: 'Eveleth Dot', sans-serif;                             /* Caps: Flavor descriptors, all-caps text */
