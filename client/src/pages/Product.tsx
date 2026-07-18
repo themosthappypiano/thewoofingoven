@@ -389,18 +389,14 @@ export default function ProductPage() {
         "https://i.ibb.co/G3pYK2Z8/image.png",
       ],
       "Bone Shaped Design": [
-        "https://i.postimg.cc/zBT4c9PF/Chat-GPT-Image-Mar-14-2026-06-46-24-PM.png",
         "https://i.postimg.cc/cJVg614N/Whats-App-Image-2025-10-15-at-21-35-32-(7).jpg",
-        "https://i.postimg.cc/KYdk4cv2/Whats-App-Image-2025-10-15-at-21-35-34-(8).jpg",
-        "https://i.postimg.cc/9X6BLL35/Whats-App-Image-2026-03-10-at-18-12-46.jpg",
-        "https://i.postimg.cc/MZCY9dC4/Whats-App-Image-2026-03-10-at-18-12-46(1).jpg",
       ],
       "Deluxe/Bespoke": [
+        "/images/products/cakes/deluxe/deluxe-duck-toffey.jpeg",
+        "/images/products/cakes/deluxe/deluxe-dog-bow.jpeg",
+        "/images/products/cakes/deluxe/deluxe-dinosaur.jpeg",
         "https://i.postimg.cc/YCzNZx43/Whats-App-Image-2025-10-15-at-21-35-34-(4).jpg",
         "https://i.postimg.cc/T1YmYBxC/Whats-App-Image-2025-10-15-at-21-35-34-(9).jpg",
-        "https://i.postimg.cc/ZKnV9GxK/Whats-App-Image-2026-03-10-at-18-14-15.jpg",
-        "https://i.postimg.cc/5NynHhS9/Whats-App-Image-2026-03-10-at-18-14-15(1).jpg",
-        "https://i.postimg.cc/65qY7kfB/Whats-App-Image-2026-03-10-at-18-17-05.jpg",
       ],
     };
     const defaultCakeImages = [

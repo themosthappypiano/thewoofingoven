@@ -12,6 +12,7 @@
     "build": "tsx script/build.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
+    "check:images": "node script/check-images.mjs",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
