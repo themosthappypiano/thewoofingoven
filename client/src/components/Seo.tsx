@@ -35,6 +35,11 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
     description:
       "Dog-friendly event catering, handcrafted bakes, styled displays, delivery, setup, and takedown across Dublin.",
   },
+  "/paws-for-venezuela": {
+    title: "Paws for Venezuela | Dog Biscuits for a Cause",
+    description:
+      "Choose and pay for a Paws for Venezuela dog biscuit. 100% raised from campaign biscuits supports Red de Apoyo Canino.",
+  },
 };
 
 function setMeta(selector: string, attribute: string, value: string) {
