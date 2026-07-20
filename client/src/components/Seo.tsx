@@ -2,10 +2,13 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 
 const SITE_URL = "https://www.thewoofingoven.ie";
+const DEFAULT_IMAGE =
+  "https://www.clarelynchcreative.com/wp-content/uploads/2024/09/1_The_Woofing_Oven_Irish_Dog_Treats_Woofles_Dogs_Packaging_Design-2500x1728.jpg";
+const CAMPAIGN_IMAGE = `${SITE_URL}/images/paws-for-venezuela/share-poster.png`;
 const DEFAULT_DESCRIPTION =
   "The Woofing Oven is a Dublin dog bakery making natural dog treats, Woofles, pupcakes, Barkday boxes, and custom dog birthday cakes.";
 
-const routeMetadata: Record<string, { title: string; description: string }> = {
+const routeMetadata: Record<string, { title: string; description: string; image?: string }> = {
   "/": {
     title: "The Woofing Oven | Dog Treats & Dog Cakes in Dublin",
     description: DEFAULT_DESCRIPTION,
@@ -38,7 +41,8 @@ const routeMetadata: Record<string, { title: string; description: string }> = {
   "/paws-for-venezuela": {
     title: "Paws for Venezuela | Dog Biscuits for a Cause",
     description:
-      "Choose and pay for a Paws for Venezuela dog biscuit. 100% raised from campaign biscuits supports Red de Apoyo Canino.",
+      "Every biscuit helps. Support Red de Apoyo Canino and help dogs in Venezuela through Paws for Venezuela.",
+    image: CAMPAIGN_IMAGE,
   },
 };
 
@@ -62,6 +66,7 @@ export function Seo() {
     const path = location.split("?")[0] || "/";
     const isProductPage = /^\/shop\/[^/]+$/.test(path);
     const isCheckoutPage = path.startsWith("/checkout");
+    const isConfirmationPage = path === "/paws-for-venezuela/thank-you";
     const metadata = isProductPage
       ? {
           title: "Dog Treats & Cakes | The Woofing Oven",
@@ -80,15 +85,17 @@ export function Seo() {
     setMeta(
       'meta[name="robots"]',
       "name",
-      isCheckoutPage || (!routeMetadata[path] && !isProductPage)
+      isCheckoutPage || isConfirmationPage || (!routeMetadata[path] && !isProductPage)
         ? "noindex, nofollow"
         : "index, follow",
     );
     setMeta('meta[property="og:title"]', "property", metadata.title);
     setMeta('meta[property="og:description"]', "property", metadata.description);
     setMeta('meta[property="og:url"]', "property", canonicalUrl);
+    setMeta('meta[property="og:image"]', "property", metadata.image || DEFAULT_IMAGE);
     setMeta('meta[name="twitter:title"]', "name", metadata.title);
     setMeta('meta[name="twitter:description"]', "name", metadata.description);
+    setMeta('meta[name="twitter:image"]', "name", metadata.image || DEFAULT_IMAGE);
 
     let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) {
