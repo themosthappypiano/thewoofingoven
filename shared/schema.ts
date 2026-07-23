@@ -193,6 +193,7 @@ export type CheckoutRequest = {
     distanceKm?: number;
   };
   specialInstructions?: string;
+  newsletterOptIn?: boolean;
   items: Array<{
     productVariantId: number;
     quantity: number;

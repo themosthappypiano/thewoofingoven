@@ -161,6 +161,35 @@ export async function registerRoutes(
   const airtableTableId = process.env.AIRTABLE_TABLE_ID || "tbl2xJrAnilq5dAII";
   const airtableFieldName = process.env.AIRTABLE_EMAIL_FIELD || "Email";
 
+  async function subscribeToNewsletter(email: string) {
+    if (!airtablePat) {
+      throw new Error("Newsletter is not configured. Missing AIRTABLE_PAT.");
+    }
+
+    const endpoint = `https://api.airtable.com/v0/${encodeURIComponent(airtableBaseId)}/${encodeURIComponent(airtableTableId)}`;
+    const airtableResponse = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${airtablePat}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        records: [{ fields: { [airtableFieldName]: email } }],
+      }),
+    });
+    const airtableBody = await airtableResponse.json();
+
+    if (!airtableResponse.ok) {
+      throw new Error(
+        airtableBody?.error?.message ||
+        airtableBody?.message ||
+        "Failed to save newsletter subscription.",
+      );
+    }
+
+    return airtableBody;
+  }
+
   const canonicalDescriptions: Record<string, string> = {
     "Doggy Birthday Cake":
       "Celebrate your pup in style with our freshly baked birthday cakes, available in 3, 4, and 6 inch sizes with your choice of protein or non-protein bases. Pick from standard, personalised, or drip designs to make their big day extra special. Handmade with dog-friendly ingredients and baked with love. Dublin delivery available for cakes, or collection.",
@@ -396,47 +425,7 @@ export async function registerRoutes(
         fieldName: airtableFieldName,
       });
 
-      if (!airtablePat) {
-        console.error("[newsletter] missing AIRTABLE_PAT");
-        return res.status(500).json({
-          message: "Newsletter is not configured. Missing AIRTABLE_PAT.",
-        });
-      }
-
-      const endpoint = `https://api.airtable.com/v0/${encodeURIComponent(airtableBaseId)}/${encodeURIComponent(airtableTableId)}`;
-      const payload = {
-        records: [
-          {
-            fields: {
-              [airtableFieldName]: email,
-            },
-          },
-        ],
-      };
-
-      const airtableResponse = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${airtablePat}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const airtableBody = await airtableResponse.json();
-      console.log("[newsletter] airtable response", {
-        status: airtableResponse.status,
-        ok: airtableResponse.ok,
-        body: airtableBody,
-      });
-      if (!airtableResponse.ok) {
-        const message =
-          airtableBody?.error?.message ||
-          airtableBody?.message ||
-          "Failed to save newsletter subscription.";
-        console.error("[newsletter] airtable rejected request", { message });
-        return res.status(400).json({ message });
-      }
+      await subscribeToNewsletter(email);
 
       console.log("[newsletter] saved subscriber", { email });
       return res.json({ success: true });
@@ -533,6 +522,7 @@ export async function registerRoutes(
       paymentIntentId: paymentIntent.id,
       paymentStatus: paymentIntent.status,
       deliveryType: paymentIntent.metadata.delivery_type || null,
+      newsletterOptIn: paymentIntent.metadata.newsletter_opt_in === "true",
       specialInstructions: paymentIntent.metadata.special_instructions || null,
       shippingAmount: Number(paymentIntent.metadata.shipping_amount || 0),
       shippingAddress,
@@ -574,6 +564,7 @@ export async function registerRoutes(
         deliveryType,
         shippingAddress,
         specialInstructions,
+        newsletterOptIn,
         items
       } = req.body;
 
@@ -745,6 +736,7 @@ export async function registerRoutes(
         customer_name: customerName,
         customer_phone: customerPhone || '',
         special_instructions: specialInstructions || '',
+        newsletter_opt_in: String(newsletterOptIn === true),
         shipping_amount: String(shippingAmount),
         ...chunkStripeMetadata("shipping_address", shippingAddressMetadata),
         ...chunkStripeMetadata("order_items", orderItemsMetadata),
@@ -792,6 +784,7 @@ export async function registerRoutes(
           customer_phone: customerPhone || '',
           delivery_type: deliveryType,
           special_instructions: specialInstructions || '',
+          newsletter_opt_in: String(newsletterOptIn === true),
           shipping_amount: String(shippingAmount),
         },
         payment_intent_data: {
@@ -799,6 +792,20 @@ export async function registerRoutes(
           metadata: paymentIntentMetadata,
         },
       });
+
+      if (newsletterOptIn === true) {
+        try {
+          const email = newsletterInputSchema.parse({ email: customerEmail }).email;
+          await subscribeToNewsletter(email);
+          console.log("[newsletter] subscribed from checkout", { email });
+        } catch (error: any) {
+          // A newsletter outage should never prevent a customer from paying.
+          console.error("[newsletter] checkout subscription failed", {
+            email: customerEmail,
+            message: error?.message,
+          });
+        }
+      }
 
       res.json({
         sessionId: session.id,

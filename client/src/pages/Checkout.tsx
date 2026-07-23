@@ -17,6 +17,7 @@ const checkoutSchema = z.object({
   customerPhone: z.string().optional(),
   deliveryType: z.enum(["collection", "delivery"]),
   specialInstructions: z.string().optional(),
+  newsletterOptIn: z.boolean().optional(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutSchema>;
@@ -31,6 +32,7 @@ export default function Checkout() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       deliveryType: "collection" as const,
+      newsletterOptIn: false,
     }
   });
 
@@ -267,6 +269,18 @@ export default function Checkout() {
                     />
                     {errors.specialInstructions && <p className="text-destructive text-sm mt-1">{errors.specialInstructions.message as string}</p>}
                   </div>
+
+                  <label className="flex items-start gap-3 rounded-xl border border-border bg-background/60 p-4 cursor-pointer hover:border-primary/50 transition-colors">
+                    <input
+                      {...register("newsletterOptIn")}
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/20"
+                    />
+                    <span>
+                      <span className="block font-semibold text-accent">Send me treats, news and special offers</span>
+                      <span className="block text-sm text-accent/60">Join the Santa Paws List. You can unsubscribe at any time.</span>
+                    </span>
+                  </label>
                 </form>
               </div>
 
