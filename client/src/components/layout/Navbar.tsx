@@ -99,15 +99,8 @@ export function Navbar() {
 
   return (
     <>
-      <div className="fixed left-0 top-0 z-[60] w-full bg-[#A40000] px-3 py-2 text-center text-sm font-bold text-white shadow-sm">
-        <Link href="/shop/21" className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-          <span>🇻🇪🐾 Paws for Venezuela</span>
-          <span>3 x Training Treats for €20 throughout July</span>
-          <span className="underline underline-offset-4">Shop now</span>
-        </Link>
-      </div>
       <header
-        className={`fixed top-9 w-full z-50 transition-all duration-300 ${
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           isScrolled ? "bg-gradient-to-b from-[#fbc560] to-[#fbc560]/20 backdrop-blur-md shadow-sm py-3" : "bg-gradient-to-b from-[#fbc560] to-transparent py-5"
         }`}
       >

@@ -6,7 +6,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { nanoid } from "nanoid";
-import { injectSocialMeta } from "./social-meta";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -53,7 +52,6 @@ export async function setupVite(server: Server, app: Express) {
 
       // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = injectSocialMeta(req.path, template);
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,

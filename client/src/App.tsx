@@ -16,8 +16,6 @@ import CheckoutCancel from "@/pages/CheckoutCancel";
 import FAQ from "@/pages/FAQ";
 import Ingredients from "@/pages/Ingredients";
 import ForBusiness from "@/pages/ForBusiness";
-import PawsForVenezuela from "@/pages/PawsForVenezuela";
-import PawsForVenezuelaThanks from "@/pages/PawsForVenezuelaThanks";
 
 function Router() {
   return (
@@ -32,8 +30,6 @@ function Router() {
       <Route path="/for-business" component={ForBusiness} />
       <Route path="/catering" component={ForBusiness} />
       <Route path="/ingredients" component={Ingredients} />
-      <Route path="/paws-for-venezuela" component={PawsForVenezuela} />
-      <Route path="/paws-for-venezuela/thank-you" component={PawsForVenezuelaThanks} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

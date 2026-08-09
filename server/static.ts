@@ -1,7 +1,6 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { injectSocialMeta } from "./social-meta";
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(__dirname, "public");
@@ -18,7 +17,7 @@ export function serveStatic(app: Express) {
     fs.promises
       .readFile(path.resolve(distPath, "index.html"), "utf-8")
       .then((html) => {
-        res.type("html").send(injectSocialMeta(req.path, html));
+        res.type("html").send(html);
       })
       .catch(next);
   });

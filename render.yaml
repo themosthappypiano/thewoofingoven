@@ -19,12 +19,6 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
-      - key: VITE_PAWS_VENEZUELA_ONE_BISCUIT_URL
-        sync: false
-      - key: VITE_PAWS_VENEZUELA_TWO_BISCUITS_URL
-        sync: false
-      - key: VITE_PAWS_VENEZUELA_DONATION_URL
-        sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY

@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 const SITE_URL = "https://www.thewoofingoven.ie";
 const DEFAULT_IMAGE =
   "https://www.clarelynchcreative.com/wp-content/uploads/2024/09/1_The_Woofing_Oven_Irish_Dog_Treats_Woofles_Dogs_Packaging_Design-2500x1728.jpg";
-const CAMPAIGN_IMAGE = `${SITE_URL}/images/paws-for-venezuela/share-poster.png`;
 const DEFAULT_DESCRIPTION =
   "The Woofing Oven is a Dublin dog bakery making natural dog treats, Woofles, pupcakes, Barkday boxes, and custom dog birthday cakes.";
 
@@ -38,12 +37,6 @@ const routeMetadata: Record<string, { title: string; description: string; image?
     description:
       "Dog-friendly event catering, handcrafted bakes, styled displays, delivery, setup, and takedown across Dublin.",
   },
-  "/paws-for-venezuela": {
-    title: "Paws for Venezuela | Dog Biscuits for a Cause",
-    description:
-      "Every biscuit helps. Support Red de Apoyo Canino and help dogs in Venezuela through Paws for Venezuela.",
-    image: CAMPAIGN_IMAGE,
-  },
 };
 
 function setMeta(selector: string, attribute: string, value: string) {
@@ -66,7 +59,6 @@ export function Seo() {
     const path = location.split("?")[0] || "/";
     const isProductPage = /^\/shop\/[^/]+$/.test(path);
     const isCheckoutPage = path.startsWith("/checkout");
-    const isConfirmationPage = path === "/paws-for-venezuela/thank-you";
     const metadata = isProductPage
       ? {
           title: "Dog Treats & Cakes | The Woofing Oven",
@@ -85,7 +77,7 @@ export function Seo() {
     setMeta(
       'meta[name="robots"]',
       "name",
-      isCheckoutPage || isConfirmationPage || (!routeMetadata[path] && !isProductPage)
+      isCheckoutPage || (!routeMetadata[path] && !isProductPage)
         ? "noindex, nofollow"
         : "index, follow",
     );
