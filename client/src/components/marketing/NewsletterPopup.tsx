@@ -16,7 +16,7 @@ export function NewsletterPopup() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (location === "/checkout") return;
+    if (location === "/checkout" || location.startsWith("/paws-for-venezuela")) return;
     if (typeof window === "undefined") return;
     if (window.localStorage.getItem(NEWSLETTER_POPUP_SEEN_KEY)) return;
     if (window.localStorage.getItem(NEWSLETTER_POPUP_SUBSCRIBED_KEY)) return;

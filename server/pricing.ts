@@ -27,6 +27,7 @@ export interface PricingConfig {
   trainingTreats: {
     singlePackPrice: number;
     multiPackDiscount: {
+      3: number; // Paws for Venezuela campaign bundle price
       4: number; // 4-pack bundle price
     };
   };
@@ -91,6 +92,7 @@ export const PRICING_CONFIG: PricingConfig = {
   trainingTreats: {
     singlePackPrice: 7.50,
     multiPackDiscount: {
+      3: 20.00,
       4: 25.00 // €3 savings on 4-pack
     }
   },
@@ -220,7 +222,12 @@ export function calculatePupcakePrice(options: PupcakeOptions): { price: number;
 export function calculateTrainingTreatsPrice(packs: number, flavor?: string): { price: number; breakdown: string[] } {
   const breakdown: string[] = [];
   
-  if (packs === 4) {
+  if (packs === 3) {
+    const price = PRICING_CONFIG.trainingTreats.multiPackDiscount[3];
+    const savings = (PRICING_CONFIG.trainingTreats.singlePackPrice * 3) - price;
+    breakdown.push(`Paws for Venezuela 3-pack: €${price} (Save €${savings.toFixed(2)})`);
+    return { price, breakdown };
+  } else if (packs === 4) {
     const price = PRICING_CONFIG.trainingTreats.multiPackDiscount[4];
     const savings = (PRICING_CONFIG.trainingTreats.singlePackPrice * 4) - price;
     breakdown.push(`4-pack bundle: €${price} (Save €${savings.toFixed(2)})`);
