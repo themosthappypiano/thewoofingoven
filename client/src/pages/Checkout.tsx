@@ -10,6 +10,7 @@ import { Link, useLocation } from "wouter";
 import { CheckCircle2, ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { hasOnlyDeliveryIncludedDeliverableItems, isCollectionOnlyCartItem } from "@shared/delivery-rules";
+import { isHolidayOrderingPaused } from "@shared/storefront-availability";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -129,6 +130,26 @@ export default function Checkout() {
       console.error('Error in onSubmit:', error);
     }
   };
+
+  if (isHolidayOrderingPaused()) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center px-4 pt-44 pb-24">
+          <div className="max-w-xl rounded-3xl border border-amber-300 bg-amber-50 p-10 text-center shadow-soft">
+            <h1 className="mb-4 text-4xl font-display font-bold text-accent">We are on holiday</h1>
+            <p className="text-lg leading-relaxed text-accent/75">
+              Ordering is temporarily unavailable until 10 October while our kitchen is closed. Thank you for your patience.
+            </p>
+            <Link href="/shop" className="mt-8 inline-flex">
+              <Button size="lg">Continue Browsing</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (isSuccess) {
     return (

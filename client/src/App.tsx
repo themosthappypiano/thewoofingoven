@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NewsletterPopup } from "@/components/marketing/NewsletterPopup";
 import { Seo } from "@/components/Seo";
+import { isHolidayOrderingPaused } from "@shared/storefront-availability";
 import NotFound from "@/pages/not-found";
 
 import Home from "@/pages/Home";
@@ -46,6 +47,11 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Seo />
+        {isHolidayOrderingPaused() && (
+          <div className="sticky top-0 z-[100] bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground shadow-md sm:text-base">
+            We are on holiday until 10 October. Ordering is temporarily unavailable while we prepare to reopen.
+          </div>
+        )}
         <NewsletterPopup />
         <Router />
       </TooltipProvider>

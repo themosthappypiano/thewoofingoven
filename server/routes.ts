@@ -14,6 +14,7 @@ import {
 import { db as dbPromise } from "./db";
 import { products, productVariants } from "@shared/schema";
 import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
+import { isHolidayOrderingPaused } from "@shared/storefront-availability";
 import { eq } from "drizzle-orm";
 
 const STRIPE_METADATA_CHUNK_SIZE = 450;
@@ -556,6 +557,12 @@ export async function registerRoutes(
 
   // Create Stripe checkout session
   app.post("/api/checkout/create-session", async (req, res) => {
+    if (isHolidayOrderingPaused()) {
+      return res.status(503).json({
+        message: "We are on holiday until 10 October. Ordering is temporarily unavailable.",
+      });
+    }
+
     try {
       const {
         customerName,

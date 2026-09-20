@@ -2,6 +2,7 @@ import { useCart } from "@/store/use-cart";
 import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Link } from "wouter";
 import { isCollectionOnlyCartItem } from "@shared/delivery-rules";
+import { isHolidayOrderingPaused } from "@shared/storefront-availability";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -138,13 +139,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <span>€{getCartTotal().toFixed(2)}</span>
             </div>
             <p className="text-sm text-accent/60">Shipping and taxes calculated at checkout.</p>
-            <Link 
-              href="/checkout"
-              onClick={onClose}
-              className="w-full flex items-center justify-center py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-soft hover:shadow-soft-hover hover:-translate-y-0.5 transition-all duration-200"
-            >
-              Secure Checkout
-            </Link>
+            {isHolidayOrderingPaused() ? (
+              <p className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-center font-semibold text-amber-900">
+                Ordering is paused while we are on holiday until 10 October.
+              </p>
+            ) : (
+              <Link
+                href="/checkout"
+                onClick={onClose}
+                className="w-full flex items-center justify-center py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg shadow-soft hover:shadow-soft-hover hover:-translate-y-0.5 transition-all duration-200"
+              >
+                Secure Checkout
+              </Link>
+            )}
           </div>
         )}
       </div>
