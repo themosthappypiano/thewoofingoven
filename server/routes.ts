@@ -575,6 +575,15 @@ export async function registerRoutes(
         items
       } = req.body;
 
+      const soldOutItem = Array.isArray(items)
+        ? items.find((item: any) => String(item?.productName || "").trim().toLowerCase() === "training treats")
+        : undefined;
+      if (soldOutItem) {
+        return res.status(400).json({
+          message: "Training Treats are currently sold out. Please remove them from your cart to continue.",
+        });
+      }
+
       const orderItemsForWebhook: Array<{
         productId: string;
         productName: string;

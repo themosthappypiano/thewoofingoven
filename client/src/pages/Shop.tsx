@@ -172,13 +172,19 @@ export default function Shop() {
                     }
                   : undefined;
                 const requiresOptions = product.name === "Doggy Birthday Cake";
+                const isSoldOut = product.name === "Training Treats";
                 return (
                 <div
                   key={product.id}
                   id={product.name === "Doggy Birthday Cake" ? "cake-product" : undefined}
                   className="group relative bg-white border border-border rounded-3xl p-4 shadow-sm hover:shadow-soft-hover transition-all duration-300"
                 >
-                  <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="block aspect-square rounded-2xl overflow-hidden mb-4 bg-secondary cursor-pointer">
+                  <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="block aspect-square rounded-2xl overflow-hidden mb-4 bg-secondary cursor-pointer relative">
+                    {isSoldOut && (
+                      <div className="absolute top-3 right-3 z-10 rounded-lg bg-accent px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white shadow">
+                        Sold Out
+                      </div>
+                    )}
                     <img
                       src={resolvedImage}
                       alt={product.name}
@@ -204,7 +210,11 @@ export default function Shop() {
                     <p className="text-primary font-bold text-lg">€{displayPrice.toFixed(2)}</p>
                   </div>
                   <div className="flex gap-2">
-                    {requiresOptions ? (
+                    {isSoldOut ? (
+                      <Button className="flex-1 gap-2" disabled>
+                        Sold Out
+                      </Button>
+                    ) : requiresOptions ? (
                       <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="flex-1">
                         <Button className="w-full gap-2">
                           <ShoppingBag size={18} />

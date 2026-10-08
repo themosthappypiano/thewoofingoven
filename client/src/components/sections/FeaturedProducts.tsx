@@ -91,13 +91,19 @@ export function FeaturedProducts() {
                 curatedImageFallbacks[product.name] ||
                 `https://placehold.co/500x500?text=${encodeURIComponent(product.name)}`;
               const requiresOptions = product.name === "Doggy Birthday Cake";
+              const isSoldOut = product.name === "Training Treats";
 
               return (
               <div key={product.id} className="group relative bg-white border border-border rounded-3xl p-4 shadow-sm hover:shadow-soft-hover transition-all duration-300 hover:-translate-y-1">
                 <Link
                   href={`/shop/${encodeURIComponent(product.handle || product.id)}`}
-                  className="block aspect-square rounded-2xl overflow-hidden mb-4 bg-secondary cursor-pointer"
+                  className="block aspect-square rounded-2xl overflow-hidden mb-4 bg-secondary cursor-pointer relative"
                 >
+                  {isSoldOut && (
+                    <div className="absolute top-3 right-3 z-10 rounded-lg bg-accent px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-white shadow">
+                      Sold Out
+                    </div>
+                  )}
                   <img 
                     src={resolvedImage} 
                     alt={product.name} 
@@ -143,7 +149,11 @@ export function FeaturedProducts() {
                   <p className="text-primary font-bold text-lg font-primary">€{(Number(product.name === "Barkday Box" ? product.variants?.find((variant: any) => variant.name === "Delivery")?.price : product.price) || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-2">
-                  {requiresOptions ? (
+                  {isSoldOut ? (
+                    <Button className="flex-1 gap-2" disabled>
+                      Sold Out
+                    </Button>
+                  ) : requiresOptions ? (
                     <Link href={`/shop/${encodeURIComponent(product.handle || product.id)}`} className="flex-1">
                       <Button className="w-full gap-2">
                         <ShoppingBag size={18} />

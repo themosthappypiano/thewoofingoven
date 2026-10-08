@@ -242,7 +242,7 @@ export default function ProductPage() {
     (useCakeSelectors ? null : parsedVariants[0]) ||
     null;
   const requiresCakeSelection = useCakeSelectors && !isDeluxe && !isBoneShaped && !hasCompleteCakeSelection;
-  const canAddToCart = !isDeluxe && !isBoneShaped && (!useCakeSelectors || Boolean(selectedVariant));
+  const canAddToCart = !isDeluxe && !isBoneShaped && !isTrainingTreats && (!useCakeSelectors || Boolean(selectedVariant));
 
   // Product descriptions based on user's detailed content
   const productDescriptions: Record<string, { short: string; full: string }> = {
@@ -927,7 +927,9 @@ export default function ProductPage() {
                 disabled={!canAddToCart}
               >
                 <ShoppingBag size={18} />
-                {isDeluxe || isBoneShaped
+                {isTrainingTreats
+                  ? "Sold Out"
+                  : isDeluxe || isBoneShaped
                   ? "Email to Order"
                   : requiresCakeSelection
                     ? "Choose cake options"
