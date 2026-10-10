@@ -157,38 +157,27 @@ export async function registerRoutes(
     email: z.string().email(),
   });
 
-  const airtablePat = process.env.AIRTABLE_PAT || "";
-  const airtableBaseId = process.env.AIRTABLE_BASE_ID || "appZ9heO1salfHYMa";
-  const airtableTableId = process.env.AIRTABLE_TABLE_ID || "tbl2xJrAnilq5dAII";
-  const airtableFieldName = process.env.AIRTABLE_EMAIL_FIELD || "Email";
+  // Newsletter signups are stored in our own n8n instance (data table
+  // "Woofing Oven Newsletter Subscribers"), not in Airtable. The same list is
+  // used by the n8n newsletter sender workflow.
+  const newsletterWebhookUrl =
+    process.env.NEWSLETTER_WEBHOOK_URL ||
+    "https://n8n.themosthappypiano.me/webhook/woofing-oven-newsletter-signup";
 
-  async function subscribeToNewsletter(email: string) {
-    if (!airtablePat) {
-      throw new Error("Newsletter is not configured. Missing AIRTABLE_PAT.");
-    }
-
-    const endpoint = `https://api.airtable.com/v0/${encodeURIComponent(airtableBaseId)}/${encodeURIComponent(airtableTableId)}`;
-    const airtableResponse = await fetch(endpoint, {
+  async function subscribeToNewsletter(email: string, source = "website") {
+    const response = await fetch(newsletterWebhookUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${airtablePat}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        records: [{ fields: { [airtableFieldName]: email } }],
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, source }),
+      signal: AbortSignal.timeout(15000),
     });
-    const airtableBody = await airtableResponse.json();
+    const body = await response.json().catch(() => ({}));
 
-    if (!airtableResponse.ok) {
-      throw new Error(
-        airtableBody?.error?.message ||
-        airtableBody?.message ||
-        "Failed to save newsletter subscription.",
-      );
+    if (!response.ok || body?.ok === false) {
+      throw new Error(body?.message || "Failed to save newsletter subscription.");
     }
 
-    return airtableBody;
+    return body;
   }
 
   const canonicalDescriptions: Record<string, string> = {
@@ -418,13 +407,7 @@ export async function registerRoutes(
   app.post("/api/newsletter/subscribe", async (req, res) => {
     try {
       const { email } = newsletterInputSchema.parse(req.body);
-      console.log("[newsletter] incoming subscribe request", {
-        email,
-        hasPat: Boolean(airtablePat),
-        baseId: airtableBaseId,
-        tableId: airtableTableId,
-        fieldName: airtableFieldName,
-      });
+      console.log("[newsletter] incoming subscribe request", { email });
 
       await subscribeToNewsletter(email);
 
@@ -812,7 +795,7 @@ export async function registerRoutes(
       if (newsletterOptIn === true) {
         try {
           const email = newsletterInputSchema.parse({ email: customerEmail }).email;
-          await subscribeToNewsletter(email);
+          await subscribeToNewsletter(email, "checkout");
           console.log("[newsletter] subscribed from checkout", { email });
         } catch (error: any) {
           // A newsletter outage should never prevent a customer from paying.
