@@ -590,6 +590,38 @@ export default function ProductPage() {
                 </p>
               </div>
 
+              {variants.length > 1 &&
+                !useCakeSelectors &&
+                !isPupcakes &&
+                !isTrainingTreats &&
+                !isWoofles &&
+                !isDognuts &&
+                !isBarkdayBox && (
+                  <div>
+                    <h2 className="font-display font-bold text-accent mb-2">Design</h2>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {parsedVariants.map((variant, index) => {
+                        const isSelected = selectedVariantId
+                          ? selectedVariantId === variant.id
+                          : index === 0;
+                        return (
+                          <button
+                            key={variant.id}
+                            onClick={() => setSelectedVariantId(variant.id)}
+                            className={`px-3 py-2 rounded-xl border text-left transition-colors ${
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <div className="font-semibold text-sm">{variant.design}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+              )}
+
               {variants.length > 0 && useCakeSelectors && (
                 <div>
                   <h2 className="font-display font-bold text-accent mb-2">Design</h2>
